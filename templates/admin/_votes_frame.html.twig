@@ -1,0 +1,12 @@
+<turbo-frame id="votes-frame-{{ question.id }}">
+    {% set voteCount = question.voteCount %}
+    <div class="d-flex align-items-center gap-2">
+        <div class="progress flex-grow-1" style="height: 20px;">
+            {% set pct = totalParticipants > 0 ? (voteCount / totalParticipants * 100)|round : 0 %}
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: {{ pct }}%">
+            </div>
+        </div>
+        <span class="fw-bold text-success">{{ voteCount }}/{{ totalParticipants }}</span>
+        <small class="text-muted">votes</small>
+    </div>
+</turbo-frame>

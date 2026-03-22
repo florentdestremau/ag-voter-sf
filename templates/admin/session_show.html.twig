@@ -1,0 +1,185 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ session.name }} - Admin{% endblock %}
+
+{% block body %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a href="{{ path('admin_index') }}" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+        <h1 class="mt-1">{{ session.name }}</h1>
+    </div>
+    <div>
+        {% if session.isPending %}
+            <span class="badge bg-secondary fs-6">En attente</span>
+        {% elseif session.isActive %}
+            <span class="badge bg-success fs-6">En cours</span>
+        {% else %}
+            <span class="badge bg-dark fs-6">Terminée</span>
+        {% endif %}
+    </div>
+</div>
+
+{# Share link #}
+<div class="card mb-4 border-primary">
+    <div class="card-body">
+        <h6 class="card-title"><i class="bi bi-share"></i> Lien de participation</h6>
+        {% set joinUrl = url('session_join', {token: session.token}) %}
+        <div class="input-group">
+            <input type="text" class="form-control font-monospace" value="{{ joinUrl }}" id="shareLink" readonly>
+            <button class="btn btn-outline-primary" type="button" onclick="navigator.clipboard.writeText('{{ joinUrl }}'); this.innerHTML='<i class=\'bi bi-check\'></i> Copié!'">
+                <i class="bi bi-clipboard"></i> Copier
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    {# Left column: session controls + participants #}
+    <div class="col-md-4">
+        {# Session actions #}
+        <div class="card mb-3">
+            <div class="card-header"><h6 class="mb-0"><i class="bi bi-sliders"></i> Contrôles</h6></div>
+            <div class="card-body d-grid gap-2">
+                {% if session.isPending %}
+                    <form method="post" action="{{ path('admin_session_open', {id: session.id}) }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi bi-play-fill"></i> Ouvrir la session
+                        </button>
+                    </form>
+                {% elseif session.isActive %}
+                    <form method="post" action="{{ path('admin_session_close', {id: session.id}) }}"
+                          onsubmit="return confirm('Fermer la session ? Cela fermera aussi la question active.')">
+                        <button type="submit" class="btn btn-danger w-100">
+                            <i class="bi bi-stop-fill"></i> Fermer la session
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Participants - polled turbo frame #}
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h6 class="mb-0"><i class="bi bi-people"></i> Participants</h6>
+                <span class="badge bg-primary" id="participant-count">{{ session.participants|length }}</span>
+            </div>
+            <div class="card-body p-0">
+                <turbo-frame
+                    id="participants-frame"
+                    src="{{ path('admin_participants_frame', {id: session.id}) }}"
+                    data-controller="poll"
+                    data-poll-interval-value="3000">
+                    {% include 'admin/_participants_frame.html.twig' %}
+                </turbo-frame>
+            </div>
+        </div>
+    </div>
+
+    {# Right column: questions #}
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5><i class="bi bi-list-ol"></i> Questions</h5>
+            {% if not session.isClosed %}
+                <a href="{{ path('admin_question_new', {id: session.id}) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus"></i> Ajouter une question
+                </a>
+            {% endif %}
+        </div>
+
+        {% if session.questions is empty %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Aucune question. Ajoutez des questions avant d'ouvrir la session.
+            </div>
+        {% else %}
+            {% for question in session.questions %}
+                <div class="card mb-3 {% if question.isActive %}border-success{% elseif question.isClosed %}border-secondary{% endif %}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold text-muted">#{{ loop.index }}</span>
+                            {% if question.isPending %}
+                                <span class="badge bg-secondary">En attente</span>
+                            {% elseif question.isActive %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-dark">Fermée</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-1">
+                            {% if question.isPending and not session.isClosed %}
+                                <a href="{{ path('admin_question_edit', {sessionId: session.id, id: question.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                {% if session.isActive %}
+                                    <form method="post" action="{{ path('admin_question_activate', {sessionId: session.id, id: question.id}) }}">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="bi bi-play"></i> Activer
+                                        </button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{{ path('admin_question_delete', {sessionId: session.id, id: question.id}) }}"
+                                      onsubmit="return confirm('Supprimer cette question ?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            {% elseif question.isActive %}
+                                <form method="post" action="{{ path('admin_question_close', {sessionId: session.id, id: question.id}) }}">
+                                    <button type="submit" class="btn btn-sm btn-warning">
+                                        <i class="bi bi-stop"></i> Fermer & résultats
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">{{ question.text }}</p>
+
+                        {# Live vote count for active question #}
+                        {% if question.isActive %}
+                            <turbo-frame
+                                id="votes-frame-{{ question.id }}"
+                                src="{{ path('admin_votes_frame', {sessionId: session.id, id: question.id}) }}"
+                                data-controller="poll"
+                                data-poll-interval-value="2000">
+                                {% include 'admin/_votes_frame.html.twig' with {question: question, totalParticipants: session.participants|length} %}
+                            </turbo-frame>
+                        {% endif %}
+
+                        {# Results for closed question #}
+                        {% if question.isClosed %}
+                            {% set totalVotes = question.votes|length %}
+                            <div class="mt-2">
+                                <small class="text-muted">{{ totalVotes }} vote(s) au total</small>
+                                {% for choice in question.choices %}
+                                    {% set choiceVoteCount = question.votes|filter(v => v.choice.id == choice.id)|length %}
+                                    {% set pct = totalVotes > 0 ? (choiceVoteCount / totalVotes * 100)|round : 0 %}
+                                    <div class="mb-2">
+                                        <div class="d-flex justify-content-between">
+                                            <span>{{ choice.text }}</span>
+                                            <span class="text-muted">{{ choiceVoteCount }} ({{ pct }}%)</span>
+                                        </div>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar" style="width: {{ pct }}%"></div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <ul class="list-unstyled mt-2 mb-0">
+                                {% for choice in question.choices %}
+                                    <li class="text-muted small">
+                                        <i class="bi bi-dot"></i> {{ choice.text }}
+                                        {% if choice.allowFreeText %}<span class="badge bg-light text-dark">texte libre</span>{% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
