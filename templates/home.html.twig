@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}AG-Voter{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 text-center">
+        <i class="bi bi-ballot display-1 text-primary"></i>
+        <h1 class="mt-3">AG-Voter</h1>
+        <p class="lead text-muted">Votes en assemblée générale, simples et en temps réel.</p>
+
+        <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center mt-4">
+            <a href="{{ path('admin_index') }}" class="btn btn-primary btn-lg">
+                <i class="bi bi-shield-lock me-1"></i> Espace admin
+            </a>
+            <a href="{{ path('session_join', {token: '__token__'}) }}" class="btn btn-outline-secondary btn-lg disabled" aria-disabled="true">
+                <i class="bi bi-person-check me-1"></i> Rejoindre via lien
+            </a>
+        </div>
+
+        <p class="text-muted small mt-4">
+            Rejoignez une session via le lien envoyé par votre organisateur.
+        </p>
+    </div>
+</div>
+{% endblock %}
