@@ -33,29 +33,32 @@
                         <br>En attente de la fermeture de la question pour voir les résultats...
                     </div>
                 {% else %}
-                    <form method="post" action="{{ path('participant_submit_vote', {token: participant.token}) }}"
-                          data-controller="vote-form">
+                    <form method="post" action="{{ path('participant_submit_vote', {token: participant.token}) }}">
                         {% for choice in activeQuestion.choices %}
-                            <div class="mb-3">
-                                <div class="d-grid">
-                                    <button type="submit" name="choice_id" value="{{ choice.id }}"
-                                            class="btn btn-outline-primary btn-lg text-start"
-                                            data-vote-form-target="choiceBtn"
-                                            data-choice-id="{{ choice.id }}">
-                                        <i class="bi bi-circle me-2"></i> {{ choice.text }}
+                            <div class="mb-2">
+                                <label class="d-flex align-items-center gap-3 p-3 rounded border">
+                                    <input type="radio" name="choice_id" value="{{ choice.id }}"
+                                           class="form-check-input flex-shrink-0 mt-0" required>
+                                    <span>
+                                        {{ choice.text }}
                                         {% if choice.allowFreeText %}
                                             <span class="badge bg-light text-dark ms-1">+ commentaire</span>
                                         {% endif %}
-                                    </button>
-                                </div>
+                                    </span>
+                                </label>
                                 {% if choice.allowFreeText %}
-                                    <div class="mt-1 free-text-area" id="free-text-{{ choice.id }}" style="display:none">
-                                        <input type="text" name="free_text" class="form-control"
+                                    <div class="mt-1 ms-4 free-text-area" id="free-text-{{ choice.id }}" style="display:none">
+                                        <input type="text" name="free_text" class="form-control form-control-sm"
                                                placeholder="Votre commentaire (optionnel)" maxlength="500">
                                     </div>
                                 {% endif %}
                             </div>
                         {% endfor %}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-check-lg me-1"></i> Soumettre mon vote
+                            </button>
+                        </div>
                     </form>
                 {% endif %}
             </div>

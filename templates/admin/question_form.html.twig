@@ -49,8 +49,28 @@
                         {% endfor %}
                     </div>
 
-                    <div data-choices-prototype="{{ form_widget(form.choices.vars.prototype)|e('html_attr') }}"
-                         style="display:none"></div>
+                    {% set proto = form.choices.vars.prototype %}
+                    {% set protoHtml %}
+                    <div class="choice-row card mb-2">
+                        <div class="card-body py-2 px-3">
+                            <div class="d-flex gap-2 align-items-center">
+                                <div class="flex-grow-1">
+                                    {{ form_widget(proto.text) }}
+                                    {{ form_errors(proto.text) }}
+                                </div>
+                                <div class="form-check d-flex align-items-center gap-1 ms-2">
+                                    {{ form_widget(proto.allowFreeText) }}
+                                    {{ form_label(proto.allowFreeText) }}
+                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                        data-action="click->choices#removeChoice">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endset %}
+                    <div data-choices-prototype="{{ protoHtml|e('html_attr') }}" style="display:none"></div>
 
                     <div class="d-flex gap-2 mb-4">
                         <button type="button" class="btn btn-outline-secondary btn-sm"
