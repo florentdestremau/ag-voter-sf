@@ -74,6 +74,16 @@
                     {{ include('admin/_participants_frame.html.twig') }}
                 </turbo-frame>
             </div>
+            {% if not session.isClosed %}
+            <div class="card-footer p-2">
+                <form method="post" action="{{ path('admin_add_participant', {id: session.id}) }}" class="d-flex gap-2">
+                    <input type="text" name="name" class="form-control form-control-sm" placeholder="Nom du participant" required minlength="2" maxlength="100">
+                    <button type="submit" class="btn btn-sm btn-outline-primary text-nowrap">
+                        <i class="bi bi-plus"></i> Ajouter
+                    </button>
+                </form>
+            </div>
+            {% endif %}
         </div>
     </div>
 

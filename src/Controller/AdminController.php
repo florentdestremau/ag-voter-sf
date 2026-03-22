@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Choice;
+use App\Entity\Participant;
 use App\Entity\Question;
 use App\Entity\Session;
 use App\Form\QuestionType;
@@ -219,6 +220,23 @@ class AdminController extends AbstractController
             'question' => $question,
             'totalParticipants' => $totalParticipants,
         ]);
+    }
+
+    #[Route('/sessions/{id}/add-participant', name: 'admin_add_participant', methods: ['POST'])]
+    public function addParticipant(int $id, Request $request, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    {
+        $session = $sessionRepo->find($id);
+        $name = trim((string) $request->request->get('name', ''));
+
+        if ($session && !$session->isClosed() && mb_strlen($name) >= 2 && mb_strlen($name) <= 100) {
+            $participant = new Participant();
+            $participant->setName($name);
+            $participant->setSession($session);
+            $em->persist($participant);
+            $em->flush();
+        }
+
+        return $this->redirectToRoute('admin_session_show', ['id' => $id]);
     }
 
     #[Route('/sessions/{id}/remove-participant/{pid}', name: 'admin_remove_participant', methods: ['POST'])]
