@@ -1,5 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
+    globals:
+        app_version: '%env(default::APP_VERSION)%'
+        build_date: '%env(default::BUILD_DATE)%'
 
 when@test:
     twig:
