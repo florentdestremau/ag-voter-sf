@@ -18,12 +18,12 @@
             </div>
         </div>
 
-        {# Main polling frame #}
+        {# Real-time frame via Mercure #}
         <turbo-frame
             id="vote-status"
             src="{{ path('participant_status_frame', {token: participant.token}) }}"
-            data-controller="poll"
-            data-poll-interval-value="3000">
+            data-controller="mercure-reload"
+            data-mercure-reload-url-value="{{ mercure('session/' ~ session.id ~ '/participant-events') }}">
             {{ include('participant/_status_frame.html.twig') }}
         </turbo-frame>
     </div>

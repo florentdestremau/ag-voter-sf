@@ -66,13 +66,8 @@
                 <span class="badge bg-primary" id="participant-count">{{ session.participants|length }}</span>
             </div>
             <div class="card-body p-0">
-                <turbo-frame
-                    id="participants-frame"
-                    src="{{ path('admin_participants_frame', {id: session.id}) }}"
-                    data-controller="poll"
-                    data-poll-interval-value="3000">
-                    {{ include('admin/_participants_frame.html.twig') }}
-                </turbo-frame>
+                <div {{ turbo_stream_listen('session/' ~ session.id ~ '/participants') }}></div>
+                {{ include('admin/_participants_frame.html.twig') }}
             </div>
             {% if not session.isClosed %}
             <div class="card-footer p-2">
@@ -148,13 +143,13 @@
 
                         {# Live vote count for active question #}
                         {% if question.isActive %}
-                            <turbo-frame
-                                id="votes-frame-{{ question.id }}"
-                                src="{{ path('admin_votes_frame', {sessionId: session.id, id: question.id}) }}"
-                                data-controller="poll"
-                                data-poll-interval-value="2000">
-                                {{ include('admin/_votes_frame.html.twig', {question: question, totalParticipants: session.participants|length}) }}
-                            </turbo-frame>
+                            {% set byChoice = {} %}
+                            {% for vote in question.votes %}
+                                {% set cid = vote.choice.id %}
+                                {% set byChoice = byChoice|merge({(cid): (byChoice[cid] ?? 0) + 1}) %}
+                            {% endfor %}
+                            <div {{ turbo_stream_listen('session/' ~ session.id ~ '/votes') }}></div>
+                            {{ include('admin/_votes_frame.html.twig', {question: question, totalParticipants: session.participants|length, byChoice: byChoice}) }}
                         {% endif %}
 
                         {# Results for closed question #}

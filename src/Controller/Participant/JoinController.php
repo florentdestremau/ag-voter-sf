@@ -4,6 +4,7 @@ namespace App\Controller\Participant;
 
 use App\Entity\Participant;
 use App\Repository\SessionRepository;
+use App\Service\SessionMercurePublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class JoinController extends AbstractController
 {
     #[Route('/s/{token}', name: 'session_join')]
-    public function __invoke(string $token, Request $request, SessionRepository $sessionRepo, EntityManagerInterface $em, SessionInterface $httpSession): Response
+    public function __invoke(string $token, Request $request, SessionRepository $sessionRepo, EntityManagerInterface $em, SessionInterface $httpSession, SessionMercurePublisher $publisher): Response
     {
         $session = $sessionRepo->findByToken($token);
         if (!$session) {
@@ -37,7 +38,8 @@ class JoinController extends AbstractController
                 $em->persist($participant);
                 $em->flush();
 
-                // Store participant token in HTTP session for convenience (optional)
+                $publisher->publishParticipantsFrame($session);
+
                 $httpSession->set('participant_token_'.$session->getToken(), $participant->getToken());
 
                 return $this->redirectToRoute('participant_vote', ['token' => $participant->getToken()]);

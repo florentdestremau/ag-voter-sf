@@ -6,6 +6,7 @@ use App\Entity\Vote;
 use App\Repository\ChoiceRepository;
 use App\Repository\ParticipantRepository;
 use App\Repository\VoteRepository;
+use App\Service\SessionMercurePublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class SubmitVoteController extends AbstractController
 {
     #[Route('/p/{token}/submit-vote', name: 'participant_submit_vote', methods: ['POST'])]
-    public function __invoke(string $token, Request $request, ParticipantRepository $participantRepo, ChoiceRepository $choiceRepo, VoteRepository $voteRepo, EntityManagerInterface $em): Response
+    public function __invoke(string $token, Request $request, ParticipantRepository $participantRepo, ChoiceRepository $choiceRepo, VoteRepository $voteRepo, EntityManagerInterface $em, SessionMercurePublisher $publisher): Response
     {
         $participant = $participantRepo->findByToken($token);
         if (!$participant) {
@@ -61,6 +62,8 @@ class SubmitVoteController extends AbstractController
         $vote->setFreeText($freeText);
         $em->persist($vote);
         $em->flush();
+
+        $publisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
 
         $this->addFlash('success', 'Vote enregistré !');
 
