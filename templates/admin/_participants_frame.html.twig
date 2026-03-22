@@ -4,25 +4,34 @@
     {% else %}
         <ul class="list-group list-group-flush">
             {% for participant in session.participants %}
-                <li class="list-group-item d-flex justify-content-between align-items-center py-2">
-                    <button type="button"
-                            class="btn btn-link p-0 text-body text-decoration-none"
-                            data-bs-toggle="tooltip"
-                            data-bs-placement="right"
-                            data-bs-title="Copier le lien de vote"
-                            onclick="navigator.clipboard.writeText('{{ absolute_url(path('participant_vote', {token: participant.token})) }}').then(() => { const t = bootstrap.Tooltip.getInstance(this); t.setContent({'.tooltip-inner': 'Lien copié !'}); this.querySelector('i').className = 'bi bi-check text-success'; setTimeout(() => { t.setContent({'.tooltip-inner': 'Copier le lien de vote'}); this.querySelector('i').className = 'bi bi-person'; }, 1500) })">
-                        <i class="bi bi-person"></i> {{ participant.name }}
-                    </button>
-                    <div class="d-flex align-items-center gap-1">
-                        <small class="text-muted">{{ participant.joinedAt|date('H:i') }}</small>
-                        {% if not session.isClosed %}
-                            <form method="post" action="{{ path('admin_remove_participant', {id: session.id, pid: participant.id}) }}"
-                                  onsubmit="return confirm('Retirer {{ participant.name }} ?')">
-                                <button type="submit" class="btn btn-sm btn-link text-danger p-0 ms-1">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
-                            </form>
-                        {% endif %}
+                {% set voteUrl = absolute_url(path('participant_vote', {token: participant.token})) %}
+                <li class="list-group-item py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="button"
+                                class="btn btn-link p-0 text-body text-decoration-none"
+                                onclick="this.closest('li').querySelector('.participant-link').classList.toggle('d-none')">
+                            <i class="bi bi-person"></i> {{ participant.name }}
+                        </button>
+                        <div class="d-flex align-items-center gap-1">
+                            <small class="text-muted">{{ participant.joinedAt|date('H:i') }}</small>
+                            {% if not session.isClosed %}
+                                <form method="post" action="{{ path('admin_remove_participant', {id: session.id, pid: participant.id}) }}"
+                                      onsubmit="return confirm('Retirer {{ participant.name }} ?')">
+                                    <button type="submit" class="btn btn-sm btn-link text-danger p-0 ms-1">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="participant-link d-none mt-2">
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control font-monospace" value="{{ voteUrl }}" readonly>
+                            <button class="btn btn-outline-primary" type="button"
+                                    onclick="navigator.clipboard.writeText('{{ voteUrl }}').then(() => { this.innerHTML = '<i class=\'bi bi-check\'></i> Copié!'; setTimeout(() => this.innerHTML = '<i class=\'bi bi-clipboard\'></i> Copier', 1500) })">
+                                <i class="bi bi-clipboard"></i> Copier
+                            </button>
+                        </div>
                     </div>
                 </li>
             {% endfor %}

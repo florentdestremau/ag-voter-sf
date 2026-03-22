@@ -335,7 +335,7 @@ class AdminSessionTest extends WebTestCase
         $this->assertSelectorTextContains('body', 'Luc Renard');
 
         $crawler = $client->getCrawler();
-        $button = $crawler->filter('button[onclick*="/p/'.$pToken.'"]');
-        $this->assertCount(1, $button);
+        $input = $crawler->filter('input[value*="/p/'.$pToken.'"]');
+        $this->assertCount(1, $input);
     }
 }
