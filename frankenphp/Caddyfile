@@ -1,15 +1,12 @@
 {
 	frankenphp
-	# Désactiver l'HTTPS automatique si derrière un reverse proxy
-	# auto_https off
+	auto_https off
+	admin off
+	persist_config off
 }
 
 :80 {
 	root * /app/public
 	encode zstd br gzip
-
-	php_server {
-		# Turbo frame polling : désactiver le buffering
-		resolve_root_symlink
-	}
+	php_server
 }
