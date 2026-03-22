@@ -103,6 +103,13 @@
                                 <div class="progress-bar {% if pct == 100 or count == total %}bg-success{% endif %}"
                                      style="width: {{ pct }}%"></div>
                             </div>
+                            {% if result.freeTexts[choice.id] is defined %}
+                                <ul class="list-unstyled mt-1 mb-0 ps-2">
+                                    {% for text in result.freeTexts[choice.id] %}
+                                        <li class="text-muted small"><i class="bi bi-chat-left-text me-1"></i>{{ text }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% endif %}
                         </div>
                     {% endfor %}
                 </div>

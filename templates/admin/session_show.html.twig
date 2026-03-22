@@ -173,6 +173,14 @@
                                         <div class="progress" style="height: 8px;">
                                             <div class="progress-bar" style="width: {{ pct }}%"></div>
                                         </div>
+                                        {% set freeTexts = question.votes|filter(v => v.choice.id == choice.id and v.freeText is not null) %}
+                                        {% if freeTexts|length > 0 %}
+                                            <ul class="list-unstyled mt-1 mb-0 ps-2">
+                                                {% for vote in freeTexts %}
+                                                    <li class="text-muted small"><i class="bi bi-chat-left-text me-1"></i>{{ vote.freeText }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% endif %}
                                     </div>
                                 {% endfor %}
                             </div>

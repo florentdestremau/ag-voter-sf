@@ -32,9 +32,14 @@ class StatusFrameController extends AbstractController
                 foreach ($rawResults as $row) {
                     $byChoice[(int) $row['choice_id']] = (int) $row['count'];
                 }
+                $freeTexts = [];
+                foreach ($voteRepo->getFreeTextsForQuestion($question) as $row) {
+                    $freeTexts[(int) $row['choice_id']][] = $row['free_text'];
+                }
                 $closedResults[$question->getId()] = [
                     'question' => $question,
                     'byChoice' => $byChoice,
+                    'freeTexts' => $freeTexts,
                     'total' => $totalVotes,
                 ];
             }
