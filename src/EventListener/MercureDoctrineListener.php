@@ -11,6 +11,7 @@ use Doctrine\Bundle\DoctrineBundle\Attribute\AsDoctrineListener;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Doctrine\ORM\Event\PostFlushEventArgs;
 use Doctrine\ORM\Events;
+use Psr\Log\LoggerInterface;
 
 #[AsDoctrineListener(event: Events::onFlush)]
 #[AsDoctrineListener(event: Events::postFlush)]
@@ -27,7 +28,9 @@ class MercureDoctrineListener
 
     public function __construct(
         private SessionMercurePublisher $publisher,
-    ) {}
+        private ?LoggerInterface $logger = null,
+    ) {
+    }
 
     public function onFlush(OnFlushEventArgs $args): void
     {
@@ -54,34 +57,38 @@ class MercureDoctrineListener
     {
         $em = $args->getObjectManager();
 
-        foreach ($this->participantsSessions as $sessionId => $_) {
-            $session = $em->find(Session::class, $sessionId);
-            if ($session) {
-                $this->publisher->publishParticipantsFrame($session);
+        try {
+            foreach ($this->participantsSessions as $sessionId => $_) {
+                $session = $em->find(Session::class, $sessionId);
+                if ($session) {
+                    $this->publisher->publishParticipantsFrame($session);
+                }
             }
-        }
 
-        foreach ($this->votesSessions as $sessionId => $_) {
-            $session = $em->find(Session::class, $sessionId);
-            if (!$session) {
-                continue;
+            foreach ($this->votesSessions as $sessionId => $_) {
+                $session = $em->find(Session::class, $sessionId);
+                if (!$session) {
+                    continue;
+                }
+                $activeQuestion = $session->getActiveQuestion();
+                if ($activeQuestion) {
+                    $this->publisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
+                }
             }
-            $activeQuestion = $session->getActiveQuestion();
-            if ($activeQuestion) {
-                $this->publisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
-            }
-        }
 
-        foreach ($this->reloadSessions as $sessionId => $_) {
-            $session = $em->find(Session::class, $sessionId);
-            if ($session) {
-                $this->publisher->publishParticipantReload($session);
+            foreach ($this->reloadSessions as $sessionId => $_) {
+                $session = $em->find(Session::class, $sessionId);
+                if ($session) {
+                    $this->publisher->publishParticipantReload($session);
+                }
             }
+        } catch (\Throwable $e) {
+            $this->logger?->error('Failed to publish Mercure update: '.$e->getMessage());
+        } finally {
+            $this->participantsSessions = [];
+            $this->votesSessions = [];
+            $this->reloadSessions = [];
         }
-
-        $this->participantsSessions = [];
-        $this->votesSessions = [];
-        $this->reloadSessions = [];
     }
 
     private function track(object $entity): void
