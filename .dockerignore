@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.php-cs-fixer.cache
+.twig-cs-fixer.cache
+var/
+tests/
+phpunit.dist.xml
+*.md
+docker-compose*.yml
+compose*.yaml
+node_modules/
