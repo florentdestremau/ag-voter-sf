@@ -71,7 +71,7 @@
                     src="{{ path('admin_participants_frame', {id: session.id}) }}"
                     data-controller="poll"
                     data-poll-interval-value="3000">
-                    {% include 'admin/_participants_frame.html.twig' %}
+                    {{ include('admin/_participants_frame.html.twig') }}
                 </turbo-frame>
             </div>
         </div>
@@ -143,7 +143,7 @@
                                 src="{{ path('admin_votes_frame', {sessionId: session.id, id: question.id}) }}"
                                 data-controller="poll"
                                 data-poll-interval-value="2000">
-                                {% include 'admin/_votes_frame.html.twig' with {question: question, totalParticipants: session.participants|length} %}
+                                {{ include('admin/_votes_frame.html.twig', {question: question, totalParticipants: session.participants|length}) }}
                             </turbo-frame>
                         {% endif %}
 

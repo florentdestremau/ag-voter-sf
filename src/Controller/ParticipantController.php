@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Participant;
 use App\Entity\Vote;
-use App\Repository\SessionRepository;
-use App\Repository\ParticipantRepository;
 use App\Repository\ChoiceRepository;
+use App\Repository\ParticipantRepository;
+use App\Repository\SessionRepository;
 use App\Repository\VoteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,7 +42,7 @@ class ParticipantController extends AbstractController
                 $em->flush();
 
                 // Store participant token in HTTP session for convenience (optional)
-                $httpSession->set('participant_token_' . $session->getToken(), $participant->getToken());
+                $httpSession->set('participant_token_'.$session->getToken(), $participant->getToken());
 
                 return $this->redirectToRoute('participant_vote', ['token' => $participant->getToken()]);
             }
@@ -74,7 +74,7 @@ class ParticipantController extends AbstractController
                 $totalVotes = array_sum(array_column($rawResults, 'count'));
                 $byChoice = [];
                 foreach ($rawResults as $row) {
-                    $byChoice[(int)$row['choice_id']] = (int)$row['count'];
+                    $byChoice[(int) $row['choice_id']] = (int) $row['count'];
                 }
                 $closedResults[$question->getId()] = [
                     'question' => $question,
@@ -114,7 +114,7 @@ class ParticipantController extends AbstractController
                 $totalVotes = array_sum(array_column($rawResults, 'count'));
                 $byChoice = [];
                 foreach ($rawResults as $row) {
-                    $byChoice[(int)$row['choice_id']] = (int)$row['count'];
+                    $byChoice[(int) $row['choice_id']] = (int) $row['count'];
                 }
                 $closedResults[$question->getId()] = [
                     'question' => $question,
@@ -146,11 +146,13 @@ class ParticipantController extends AbstractController
 
         if (!$activeQuestion) {
             $this->addFlash('error', 'Aucune question active.');
+
             return $this->redirectToRoute('participant_vote', ['token' => $token]);
         }
 
         if ($participant->hasVotedOn($activeQuestion)) {
             $this->addFlash('info', 'Vous avez déjà voté sur cette question.');
+
             return $this->redirectToRoute('participant_vote', ['token' => $token]);
         }
 
@@ -159,13 +161,14 @@ class ParticipantController extends AbstractController
 
         if (!$choice || $choice->getQuestion() !== $activeQuestion) {
             $this->addFlash('error', 'Choix invalide.');
+
             return $this->redirectToRoute('participant_vote', ['token' => $token]);
         }
 
         $freeText = null;
         if ($choice->isAllowFreeText()) {
             $freeText = trim($request->request->getString('free_text'));
-            if ($freeText === '') {
+            if ('' === $freeText) {
                 $freeText = null;
             }
         }
@@ -179,6 +182,7 @@ class ParticipantController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Vote enregistré !');
+
         return $this->redirectToRoute('participant_vote', ['token' => $token]);
     }
 
@@ -190,8 +194,10 @@ class ParticipantController extends AbstractController
             $sessionToken = $participant->getSession()->getToken();
             $em->remove($participant);
             $em->flush();
+
             return $this->redirectToRoute('session_join', ['token' => $sessionToken]);
         }
+
         return $this->redirectToRoute('admin_index');
     }
 }

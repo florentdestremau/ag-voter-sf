@@ -2,14 +2,13 @@
 
 namespace App\Controller;
 
-use App\Entity\Session;
-use App\Entity\Question;
 use App\Entity\Choice;
-use App\Form\SessionType;
+use App\Entity\Question;
+use App\Entity\Session;
 use App\Form\QuestionType;
-use App\Repository\SessionRepository;
+use App\Form\SessionType;
 use App\Repository\ParticipantRepository;
-use App\Repository\VoteRepository;
+use App\Repository\SessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -38,6 +37,7 @@ class AdminController extends AbstractController
             $em->persist($session);
             $em->flush();
             $this->addFlash('success', 'Session créée avec succès.');
+
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
         }
 
@@ -58,6 +58,7 @@ class AdminController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'Session ouverte. Les participants peuvent voter.');
         }
+
         return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
     }
 
@@ -75,6 +76,7 @@ class AdminController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'Session fermée.');
         }
+
         return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
     }
 
@@ -83,6 +85,7 @@ class AdminController extends AbstractController
     {
         if ($session->isClosed()) {
             $this->addFlash('error', 'Impossible d\'ajouter une question à une session fermée.');
+
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
         }
 
@@ -107,6 +110,7 @@ class AdminController extends AbstractController
             $em->persist($question);
             $em->flush();
             $this->addFlash('success', 'Question ajoutée.');
+
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
         }
 
@@ -135,6 +139,7 @@ class AdminController extends AbstractController
             }
             $em->flush();
             $this->addFlash('success', 'Question modifiée.');
+
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
         }
 
@@ -154,6 +159,7 @@ class AdminController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'Question supprimée.');
         }
+
         return $this->redirectToRoute('admin_session_show', ['id' => $sessionId]);
     }
 
@@ -190,6 +196,7 @@ class AdminController extends AbstractController
             $em->flush();
             $this->addFlash('success', 'Question fermée. Les résultats sont affichés.');
         }
+
         return $this->redirectToRoute('admin_session_show', ['id' => $sessionId]);
     }
 
@@ -207,6 +214,7 @@ class AdminController extends AbstractController
             return new Response('', 404);
         }
         $totalParticipants = $session->getParticipants()->count();
+
         return $this->render('admin/_votes_frame.html.twig', [
             'question' => $question,
             'totalParticipants' => $totalParticipants,
@@ -222,6 +230,7 @@ class AdminController extends AbstractController
             $em->remove($participant);
             $em->flush();
         }
+
         return $this->redirectToRoute('admin_session_show', ['id' => $id]);
     }
 }

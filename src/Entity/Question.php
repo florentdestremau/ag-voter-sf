@@ -47,21 +47,79 @@ class Question
         $this->votes = new ArrayCollection();
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getText(): string { return $this->text; }
-    public function setText(string $text): static { $this->text = $text; return $this; }
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; return $this; }
-    public function getOrderIndex(): int { return $this->orderIndex; }
-    public function setOrderIndex(int $orderIndex): static { $this->orderIndex = $orderIndex; return $this; }
-    public function getSession(): Session { return $this->session; }
-    public function setSession(Session $session): static { $this->session = $session; return $this; }
-    public function isPending(): bool { return $this->status === self::STATUS_PENDING; }
-    public function isActive(): bool { return $this->status === self::STATUS_ACTIVE; }
-    public function isClosed(): bool { return $this->status === self::STATUS_CLOSED; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getText(): string
+    {
+        return $this->text;
+    }
+
+    public function setText(string $text): static
+    {
+        $this->text = $text;
+
+        return $this;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getOrderIndex(): int
+    {
+        return $this->orderIndex;
+    }
+
+    public function setOrderIndex(int $orderIndex): static
+    {
+        $this->orderIndex = $orderIndex;
+
+        return $this;
+    }
+
+    public function getSession(): Session
+    {
+        return $this->session;
+    }
+
+    public function setSession(Session $session): static
+    {
+        $this->session = $session;
+
+        return $this;
+    }
+
+    public function isPending(): bool
+    {
+        return self::STATUS_PENDING === $this->status;
+    }
+
+    public function isActive(): bool
+    {
+        return self::STATUS_ACTIVE === $this->status;
+    }
+
+    public function isClosed(): bool
+    {
+        return self::STATUS_CLOSED === $this->status;
+    }
 
     /** @return Collection<int, Choice> */
-    public function getChoices(): Collection { return $this->choices; }
+    public function getChoices(): Collection
+    {
+        return $this->choices;
+    }
 
     public function addChoice(Choice $choice): static
     {
@@ -69,17 +127,25 @@ class Question
             $this->choices->add($choice);
             $choice->setQuestion($this);
         }
+
         return $this;
     }
 
     public function removeChoice(Choice $choice): static
     {
         $this->choices->removeElement($choice);
+
         return $this;
     }
 
     /** @return Collection<int, Vote> */
-    public function getVotes(): Collection { return $this->votes; }
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
 
-    public function getVoteCount(): int { return $this->votes->count(); }
+    public function getVoteCount(): int
+    {
+        return $this->votes->count();
+    }
 }

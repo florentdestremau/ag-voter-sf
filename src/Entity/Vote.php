@@ -37,14 +37,61 @@ class Vote
         $this->votedAt = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getParticipant(): Participant { return $this->participant; }
-    public function setParticipant(Participant $participant): static { $this->participant = $participant; return $this; }
-    public function getQuestion(): Question { return $this->question; }
-    public function setQuestion(Question $question): static { $this->question = $question; return $this; }
-    public function getChoice(): Choice { return $this->choice; }
-    public function setChoice(Choice $choice): static { $this->choice = $choice; return $this; }
-    public function getFreeText(): ?string { return $this->freeText; }
-    public function setFreeText(?string $freeText): static { $this->freeText = $freeText; return $this; }
-    public function getVotedAt(): \DateTimeImmutable { return $this->votedAt; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getParticipant(): Participant
+    {
+        return $this->participant;
+    }
+
+    public function setParticipant(Participant $participant): static
+    {
+        $this->participant = $participant;
+
+        return $this;
+    }
+
+    public function getQuestion(): Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(Question $question): static
+    {
+        $this->question = $question;
+
+        return $this;
+    }
+
+    public function getChoice(): Choice
+    {
+        return $this->choice;
+    }
+
+    public function setChoice(Choice $choice): static
+    {
+        $this->choice = $choice;
+
+        return $this;
+    }
+
+    public function getFreeText(): ?string
+    {
+        return $this->freeText;
+    }
+
+    public function setFreeText(?string $freeText): static
+    {
+        $this->freeText = $freeText;
+
+        return $this;
+    }
+
+    public function getVotedAt(): \DateTimeImmutable
+    {
+        return $this->votedAt;
+    }
 }

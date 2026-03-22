@@ -70,7 +70,7 @@ class ParticipantTest extends WebTestCase
         $token = $session->getToken();
         $em->clear();
 
-        $client->request('GET', '/s/' . $token);
+        $client->request('GET', '/s/'.$token);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h2', 'Session join');
     }
@@ -88,7 +88,7 @@ class ParticipantTest extends WebTestCase
         $token = $session->getToken();
         $em->clear();
 
-        $client->request('POST', '/s/' . $token, ['name' => 'Jean Dupont']);
+        $client->request('POST', '/s/'.$token, ['name' => 'Jean Dupont']);
         $this->assertResponseRedirects();
         $client->followRedirect();
 
@@ -109,7 +109,7 @@ class ParticipantTest extends WebTestCase
         $token = $session->getToken();
         $em->clear();
 
-        $client->request('POST', '/s/' . $token, ['name' => 'A']);
+        $client->request('POST', '/s/'.$token, ['name' => 'A']);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'entre 2 et 100');
     }
@@ -127,7 +127,7 @@ class ParticipantTest extends WebTestCase
         $token = $session->getToken();
         $em->clear();
 
-        $client->request('GET', '/s/' . $token);
+        $client->request('GET', '/s/'.$token);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'terminée');
     }
@@ -160,7 +160,7 @@ class ParticipantTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $client->request('GET', '/p/' . $pToken);
+        $client->request('GET', '/p/'.$pToken);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'attente');
     }
@@ -170,7 +170,7 @@ class ParticipantTest extends WebTestCase
         $client = static::createClient();
         [, $pToken] = $this->setupActiveVotingSession();
 
-        $client->request('GET', '/p/' . $pToken);
+        $client->request('GET', '/p/'.$pToken);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Approuvez-vous ?');
         $this->assertSelectorTextContains('body', 'Pour');
@@ -197,7 +197,7 @@ class ParticipantTest extends WebTestCase
         $em->flush();
         $em->clear();
 
-        $client->request('GET', '/p/' . $pToken);
+        $client->request('GET', '/p/'.$pToken);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'déjà voté');
     }
@@ -236,7 +236,7 @@ class ParticipantTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $client->request('GET', '/p/' . $pToken);
+        $client->request('GET', '/p/'.$pToken);
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Question avec résultats');
         $this->assertSelectorTextContains('body', 'Résultats');
@@ -253,10 +253,10 @@ class ParticipantTest extends WebTestCase
 
         [, $pToken, $choicePourId, , $questionId] = $this->setupActiveVotingSession();
 
-        $client->request('POST', '/p/' . $pToken . '/submit-vote', [
+        $client->request('POST', '/p/'.$pToken.'/submit-vote', [
             'choice_id' => $choicePourId,
         ]);
-        $this->assertResponseRedirects('/p/' . $pToken);
+        $this->assertResponseRedirects('/p/'.$pToken);
 
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
         $vote = $em->getRepository(Vote::class)->findOneBy([
@@ -286,10 +286,10 @@ class ParticipantTest extends WebTestCase
         $em->clear();
 
         // Tentative de second vote via HTTP
-        $client->request('POST', '/p/' . $pToken . '/submit-vote', [
+        $client->request('POST', '/p/'.$pToken.'/submit-vote', [
             'choice_id' => $choiceContreId,
         ]);
-        $this->assertResponseRedirects('/p/' . $pToken);
+        $this->assertResponseRedirects('/p/'.$pToken);
 
         // Toujours un seul vote, toujours "Pour"
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
@@ -305,8 +305,8 @@ class ParticipantTest extends WebTestCase
 
         [, $pToken] = $this->setupActiveVotingSession();
 
-        $client->request('POST', '/p/' . $pToken . '/submit-vote', ['choice_id' => 99999]);
-        $this->assertResponseRedirects('/p/' . $pToken);
+        $client->request('POST', '/p/'.$pToken.'/submit-vote', ['choice_id' => 99999]);
+        $this->assertResponseRedirects('/p/'.$pToken);
 
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
         $this->assertCount(0, $em->getRepository(Vote::class)->findBy(['participant' => $participant]));
@@ -330,8 +330,8 @@ class ParticipantTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $client->request('POST', '/p/' . $pToken . '/submit-vote', ['choice_id' => 1]);
-        $this->assertResponseRedirects('/p/' . $pToken);
+        $client->request('POST', '/p/'.$pToken.'/submit-vote', ['choice_id' => 1]);
+        $this->assertResponseRedirects('/p/'.$pToken);
 
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
         $this->assertCount(0, $em->getRepository(Vote::class)->findBy(['participant' => $participant]));
@@ -361,8 +361,8 @@ class ParticipantTest extends WebTestCase
         $sessionToken = $session->getToken();
         $em->clear();
 
-        $client->request('POST', '/p/' . $pToken . '/leave');
-        $this->assertResponseRedirects('/s/' . $sessionToken);
+        $client->request('POST', '/p/'.$pToken.'/leave');
+        $this->assertResponseRedirects('/s/'.$sessionToken);
 
         $this->assertNull($em->find(Participant::class, $pid));
     }
@@ -389,7 +389,7 @@ class ParticipantTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $client->request('GET', '/p/' . $pToken . '/status');
+        $client->request('GET', '/p/'.$pToken.'/status');
         $this->assertResponseIsSuccessful();
     }
 }

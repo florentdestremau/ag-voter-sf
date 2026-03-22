@@ -39,16 +39,50 @@ class Participant
         $this->votes = new ArrayCollection();
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getName(): string { return $this->name; }
-    public function setName(string $name): static { $this->name = $name; return $this; }
-    public function getToken(): string { return $this->token; }
-    public function getSession(): Session { return $this->session; }
-    public function setSession(Session $session): static { $this->session = $session; return $this; }
-    public function getJoinedAt(): \DateTimeImmutable { return $this->joinedAt; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    public function getSession(): Session
+    {
+        return $this->session;
+    }
+
+    public function setSession(Session $session): static
+    {
+        $this->session = $session;
+
+        return $this;
+    }
+
+    public function getJoinedAt(): \DateTimeImmutable
+    {
+        return $this->joinedAt;
+    }
 
     /** @return Collection<int, Vote> */
-    public function getVotes(): Collection { return $this->votes; }
+    public function getVotes(): Collection
+    {
+        return $this->votes;
+    }
 
     public function hasVotedOn(Question $question): bool
     {
@@ -57,6 +91,7 @@ class Participant
                 return true;
             }
         }
+
         return false;
     }
 }

@@ -49,22 +49,71 @@ class Session
         $this->questions = new ArrayCollection();
     }
 
-    public function getId(): ?int { return $this->id; }
-    public function getName(): string { return $this->name; }
-    public function setName(string $name): static { $this->name = $name; return $this; }
-    public function getToken(): string { return $this->token; }
-    public function getStatus(): string { return $this->status; }
-    public function setStatus(string $status): static { $this->status = $status; return $this; }
-    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
-    public function isPending(): bool { return $this->status === self::STATUS_PENDING; }
-    public function isActive(): bool { return $this->status === self::STATUS_ACTIVE; }
-    public function isClosed(): bool { return $this->status === self::STATUS_CLOSED; }
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getToken(): string
+    {
+        return $this->token;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): static
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): \DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function isPending(): bool
+    {
+        return self::STATUS_PENDING === $this->status;
+    }
+
+    public function isActive(): bool
+    {
+        return self::STATUS_ACTIVE === $this->status;
+    }
+
+    public function isClosed(): bool
+    {
+        return self::STATUS_CLOSED === $this->status;
+    }
 
     /** @return Collection<int, Participant> */
-    public function getParticipants(): Collection { return $this->participants; }
+    public function getParticipants(): Collection
+    {
+        return $this->participants;
+    }
 
     /** @return Collection<int, Question> */
-    public function getQuestions(): Collection { return $this->questions; }
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
 
     public function getActiveQuestion(): ?Question
     {
@@ -73,6 +122,7 @@ class Session
                 return $question;
             }
         }
+
         return null;
     }
 }
