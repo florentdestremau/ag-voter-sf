@@ -12,9 +12,22 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ path('admin_index') }}">
+            <a class="navbar-brand fw-bold" href="{{ path('home') }}">
                 <i class="bi bi-ballot"></i> AG-Voter
             </a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <a href="{{ path('admin_index') }}" class="text-white text-decoration-none small">
+                        <i class="bi bi-speedometer2"></i> Admin
+                    </a>
+                    <form method="post" action="{{ path('logout') }}" class="m-0">
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                        <button type="submit" class="btn btn-sm btn-outline-light">
+                            <i class="bi bi-box-arrow-right"></i> Déconnexion
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
         </div>
     </nav>
 

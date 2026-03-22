@@ -13,10 +13,13 @@ class AdminSessionTest extends WebTestCase
 {
     private function getAdminClient(): \Symfony\Bundle\FrameworkBundle\KernelBrowser
     {
-        return static::createClient([], [
-            'PHP_AUTH_USER' => 'admin',
-            'PHP_AUTH_PW' => 'admin123',
-        ]);
+        $client = static::createClient();
+        $client->loginUser(
+            static::getContainer()->get('security.user.provider.concrete.admin_provider')->loadUserByIdentifier('admin'),
+            'admin'
+        );
+
+        return $client;
     }
 
     private function em(): EntityManagerInterface
@@ -32,7 +35,7 @@ class AdminSessionTest extends WebTestCase
     {
         $client = static::createClient();
         $client->request('GET', '/admin');
-        $this->assertResponseStatusCodeSame(401);
+        $this->assertResponseRedirects('/login');
     }
 
     public function testAdminIndexWithAuth(): void

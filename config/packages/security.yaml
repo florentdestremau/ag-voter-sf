@@ -15,11 +15,18 @@ security:
             pattern: ^/(_(profiler|wdt)|assets|build)/
             security: false
         admin:
-            pattern: ^/admin
+            pattern: ^/(admin|login|logout)
             lazy: true
             provider: admin_provider
-            http_basic:
-                realm: "AG-Voter Admin"
+            form_login:
+                login_path: login
+                check_path: login
+                default_target_path: admin_index
+                username_parameter: username
+                password_parameter: password
+            logout:
+                path: logout
+                target: login
         main:
             lazy: true
 
