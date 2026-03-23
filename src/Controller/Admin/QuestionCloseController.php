@@ -12,12 +12,12 @@ use Symfony\Component\Routing\Attribute\Route;
 class QuestionCloseController extends AbstractController
 {
     #[Route('/admin/sessions/{sessionId}/questions/{id}/close', name: 'admin_question_close', methods: ['POST'])]
-    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $entityManager, SessionRepository $sessionRepository): Response
     {
-        $session = $sessionRepo->find($sessionId);
+        $session = $sessionRepository->find($sessionId);
         if ($session && $question->getSession() === $session && $question->isActive()) {
             $question->setStatus(Question::STATUS_CLOSED);
-            $em->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Question fermée. Les résultats sont affichés.');
         }
 

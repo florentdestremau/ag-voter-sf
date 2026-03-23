@@ -12,13 +12,13 @@ use Symfony\Component\Routing\Attribute\Route;
 class ParticipantRemoveController extends AbstractController
 {
     #[Route('/admin/sessions/{id}/remove-participant/{pid}', name: 'admin_remove_participant', methods: ['POST'])]
-    public function __invoke(int $id, int $pid, EntityManagerInterface $em, SessionRepository $sessionRepo, ParticipantRepository $participantRepo): Response
+    public function __invoke(int $id, int $pid, EntityManagerInterface $entityManager, SessionRepository $sessionRepository, ParticipantRepository $participantRepository): Response
     {
-        $session = $sessionRepo->find($id);
-        $participant = $participantRepo->find($pid);
+        $session = $sessionRepository->find($id);
+        $participant = $participantRepository->find($pid);
         if ($session && $participant && $participant->getSession() === $session) {
-            $em->remove($participant);
-            $em->flush();
+            $entityManager->remove($participant);
+            $entityManager->flush();
         }
 
         return $this->redirectToRoute('admin_session_show', ['id' => $id]);

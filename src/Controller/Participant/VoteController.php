@@ -2,6 +2,8 @@
 
 namespace App\Controller\Participant;
 
+use App\Entity\Question;
+use App\Entity\Participant;
 use App\Repository\ParticipantRepository;
 use App\Repository\VoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -11,32 +13,33 @@ use Symfony\Component\Routing\Attribute\Route;
 class VoteController extends AbstractController
 {
     #[Route('/p/{token}', name: 'participant_vote')]
-    public function __invoke(string $token, ParticipantRepository $participantRepo, VoteRepository $voteRepo): Response
+    public function __invoke(string $token, ParticipantRepository $participantRepository, VoteRepository $voteRepository): Response
     {
-        $participant = $participantRepo->findByToken($token);
-        if (!$participant) {
+        $participant = $participantRepository->findByToken($token);
+        if (!$participant instanceof Participant) {
             throw $this->createNotFoundException('Participant introuvable.');
         }
 
         $session = $participant->getSession();
         $activeQuestion = $session->getActiveQuestion();
-        $alreadyVoted = $activeQuestion ? $participant->hasVotedOn($activeQuestion) : false;
+        $alreadyVoted = $activeQuestion instanceof Question && $participant->hasVotedOn($activeQuestion);
 
         // Build results for closed questions
         $closedResults = [];
         foreach ($session->getQuestions() as $question) {
             if ($question->isClosed()) {
-                $rawResults = $voteRepo->getResultsForQuestion($question);
+                $rawResults = $voteRepository->getResultsForQuestion($question);
                 $totalVotes = array_sum(array_column($rawResults, 'count'));
                 $byChoice = [];
-                foreach ($rawResults as $row) {
-                    $byChoice[(int) $row['choice_id']] = (int) $row['count'];
+                foreach ($rawResults as $rawResult) {
+                    $byChoice[(int) $rawResult['choice_id']] = (int) $rawResult['count'];
                 }
+
                 $closedResults[$question->getId()] = [
                     'question' => $question,
                     'byChoice' => $byChoice,
                     'total' => $totalVotes,
-                    'freeTexts' => $voteRepo->getFreeTextsForQuestion($question),
+                    'freeTexts' => $voteRepository->getFreeTextsForQuestion($question),
                 ];
             }
         }

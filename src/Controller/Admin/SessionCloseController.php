@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class SessionCloseController extends AbstractController
 {
     #[Route('/admin/sessions/{id}/close', name: 'admin_session_close', methods: ['POST'])]
-    public function __invoke(Session $session, EntityManagerInterface $em): Response
+    public function __invoke(Session $session, EntityManagerInterface $entityManager): Response
     {
         if ($session->isActive()) {
             foreach ($session->getQuestions() as $question) {
@@ -20,8 +20,9 @@ class SessionCloseController extends AbstractController
                     $question->setStatus(Question::STATUS_CLOSED);
                 }
             }
+
             $session->setStatus(Session::STATUS_CLOSED);
-            $em->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Session fermée.');
         }
 

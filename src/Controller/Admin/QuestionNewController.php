@@ -15,7 +15,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class QuestionNewController extends AbstractController
 {
     #[Route('/admin/sessions/{id}/questions/new', name: 'admin_question_new', methods: ['GET', 'POST'])]
-    public function __invoke(Request $request, Session $session, EntityManagerInterface $em): Response
+    public function __invoke(Request $request, Session $session, EntityManagerInterface $entityManager): Response
     {
         if ($session->isClosed()) {
             $this->addFlash('error', 'Impossible d\'ajouter une question à une session fermée.');
@@ -41,8 +41,9 @@ class QuestionNewController extends AbstractController
                 $choice->setQuestion($question);
                 $choice->setOrderIndex($i);
             }
-            $em->persist($question);
-            $em->flush();
+
+            $entityManager->persist($question);
+            $entityManager->flush();
             $this->addFlash('success', 'Question ajoutée.');
 
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);

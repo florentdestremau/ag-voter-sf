@@ -2,6 +2,8 @@
 
 namespace App\Controller\Participant;
 
+use App\Entity\Participant;
+use App\Entity\Question;
 use App\Entity\Vote;
 use App\Repository\ChoiceRepository;
 use App\Repository\ParticipantRepository;
@@ -15,17 +17,17 @@ use Symfony\Component\Routing\Attribute\Route;
 class SubmitVoteController extends AbstractController
 {
     #[Route('/p/{token}/submit-vote', name: 'participant_submit_vote', methods: ['POST'])]
-    public function __invoke(string $token, Request $request, ParticipantRepository $participantRepo, ChoiceRepository $choiceRepo, VoteRepository $voteRepo, EntityManagerInterface $em): Response
+    public function __invoke(string $token, Request $request, ParticipantRepository $participantRepository, ChoiceRepository $choiceRepository, VoteRepository $voteRepository, EntityManagerInterface $entityManager): Response
     {
-        $participant = $participantRepo->findByToken($token);
-        if (!$participant) {
+        $participant = $participantRepository->findByToken($token);
+        if (!$participant instanceof Participant) {
             throw $this->createNotFoundException('Participant introuvable.');
         }
 
         $session = $participant->getSession();
         $activeQuestion = $session->getActiveQuestion();
 
-        if (!$activeQuestion) {
+        if (!$activeQuestion instanceof Question) {
             $this->addFlash('error', 'Aucune question active.');
 
             return $this->redirectToRoute('participant_vote', ['token' => $token]);
@@ -38,7 +40,7 @@ class SubmitVoteController extends AbstractController
         }
 
         $choiceId = (int) $request->request->get('choice_id');
-        $choice = $choiceRepo->find($choiceId);
+        $choice = $choiceRepository->find($choiceId);
 
         if (!$choice || $choice->getQuestion() !== $activeQuestion) {
             $this->addFlash('error', 'Choix invalide.');
@@ -59,8 +61,9 @@ class SubmitVoteController extends AbstractController
         $vote->setQuestion($activeQuestion);
         $vote->setChoice($choice);
         $vote->setFreeText($freeText);
-        $em->persist($vote);
-        $em->flush();
+
+        $entityManager->persist($vote);
+        $entityManager->flush();
 
         $this->addFlash('success', 'Vote enregistré !');
 

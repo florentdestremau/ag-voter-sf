@@ -13,15 +13,15 @@ use Symfony\Component\Routing\Attribute\Route;
 class SessionNewController extends AbstractController
 {
     #[Route('/admin/sessions/new', name: 'admin_session_new', methods: ['GET', 'POST'])]
-    public function __invoke(Request $request, EntityManagerInterface $em): Response
+    public function __invoke(Request $request, EntityManagerInterface $entityManager): Response
     {
         $session = new Session();
         $form = $this->createForm(SessionType::class, $session);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($session);
-            $em->flush();
+            $entityManager->persist($session);
+            $entityManager->flush();
             $this->addFlash('success', 'Session créée avec succès.');
 
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);

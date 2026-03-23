@@ -2,6 +2,7 @@
 
 namespace App\EventListener;
 
+use Throwable;
 use App\Entity\Participant;
 use App\Entity\Question;
 use App\Entity\Session;
@@ -27,63 +28,64 @@ class MercureDoctrineListener
     private array $reloadSessions = [];
 
     public function __construct(
-        private readonly SessionMercurePublisher $publisher,
+        private readonly SessionMercurePublisher $sessionMercurePublisher,
         private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
-    public function onFlush(OnFlushEventArgs $args): void
+    public function onFlush(OnFlushEventArgs $onFlushEventArgs): void
     {
         $this->participantsSessions = [];
         $this->votesSessions = [];
         $this->reloadSessions = [];
 
-        $uow = $args->getObjectManager()->getUnitOfWork();
+        $unitOfWork = $onFlushEventArgs->getObjectManager()->getUnitOfWork();
 
-        foreach ($uow->getScheduledEntityInsertions() as $entity) {
+        foreach ($unitOfWork->getScheduledEntityInsertions() as $entity) {
             $this->track($entity);
         }
 
-        foreach ($uow->getScheduledEntityDeletions() as $entity) {
+        foreach ($unitOfWork->getScheduledEntityDeletions() as $entity) {
             $this->track($entity);
         }
 
-        foreach ($uow->getScheduledEntityUpdates() as $entity) {
+        foreach ($unitOfWork->getScheduledEntityUpdates() as $entity) {
             $this->track($entity);
         }
     }
 
-    public function postFlush(PostFlushEventArgs $args): void
+    public function postFlush(PostFlushEventArgs $postFlushEventArgs): void
     {
-        $em = $args->getObjectManager();
+        $entityManager = $postFlushEventArgs->getObjectManager();
 
         try {
             foreach ($this->participantsSessions as $sessionId => $_) {
-                $session = $em->find(Session::class, $sessionId);
-                if ($session) {
-                    $this->publisher->publishParticipantsFrame($session);
+                $session = $entityManager->find(Session::class, $sessionId);
+                if ($session instanceof Session) {
+                    $this->sessionMercurePublisher->publishParticipantsFrame($session);
                 }
             }
 
             foreach ($this->votesSessions as $sessionId => $_) {
-                $session = $em->find(Session::class, $sessionId);
-                if (!$session) {
+                $session = $entityManager->find(Session::class, $sessionId);
+                if (!$session instanceof Session) {
                     continue;
                 }
+
                 $activeQuestion = $session->getActiveQuestion();
                 if ($activeQuestion) {
-                    $this->publisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
+                    $this->sessionMercurePublisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
                 }
             }
 
-            foreach ($this->reloadSessions as $sessionId => $_) {
-                $session = $em->find(Session::class, $sessionId);
-                if ($session) {
-                    $this->publisher->publishParticipantReload($session);
+            foreach (array_keys($this->reloadSessions) as $sessionId) {
+                $session = $entityManager->find(Session::class, $sessionId);
+                if ($session instanceof Session) {
+                    $this->sessionMercurePublisher->publishParticipantReload($session);
                 }
             }
-        } catch (\Throwable $e) {
-            $this->logger?->error('Failed to publish Mercure update: '.$e->getMessage());
+        } catch (Throwable $throwable) {
+            $this->logger?->error('Failed to publish Mercure update: '.$throwable->getMessage());
         } finally {
             $this->participantsSessions = [];
             $this->votesSessions = [];

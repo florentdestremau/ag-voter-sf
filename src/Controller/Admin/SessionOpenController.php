@@ -11,11 +11,11 @@ use Symfony\Component\Routing\Attribute\Route;
 class SessionOpenController extends AbstractController
 {
     #[Route('/admin/sessions/{id}/open', name: 'admin_session_open', methods: ['POST'])]
-    public function __invoke(Session $session, EntityManagerInterface $em): Response
+    public function __invoke(Session $session, EntityManagerInterface $entityManager): Response
     {
         if ($session->isPending()) {
             $session->setStatus(Session::STATUS_ACTIVE);
-            $em->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Session ouverte. Les participants peuvent voter.');
         }
 

@@ -13,17 +13,17 @@ use Symfony\Component\Routing\Attribute\Route;
 class ParticipantAddController extends AbstractController
 {
     #[Route('/admin/sessions/{id}/add-participant', name: 'admin_add_participant', methods: ['POST'])]
-    public function __invoke(int $id, Request $request, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    public function __invoke(int $id, Request $request, EntityManagerInterface $entityManager, SessionRepository $sessionRepository): Response
     {
-        $session = $sessionRepo->find($id);
+        $session = $sessionRepository->find($id);
         $name = trim((string) $request->request->get('name', ''));
 
         if ($session && !$session->isClosed() && mb_strlen($name) >= 2 && mb_strlen($name) <= 100) {
             $participant = new Participant();
             $participant->setName($name);
             $participant->setSession($session);
-            $em->persist($participant);
-            $em->flush();
+            $entityManager->persist($participant);
+            $entityManager->flush();
         }
 
         return $this->redirectToRoute('admin_session_show', ['id' => $id]);

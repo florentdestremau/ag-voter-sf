@@ -12,9 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class QuestionActivateController extends AbstractController
 {
     #[Route('/admin/sessions/{sessionId}/questions/{id}/activate', name: 'admin_question_activate', methods: ['POST'])]
-    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $entityManager, SessionRepository $sessionRepository): Response
     {
-        $session = $sessionRepo->find($sessionId);
+        $session = $sessionRepository->find($sessionId);
         if (!$session || $question->getSession() !== $session || !$session->isActive()) {
             return $this->redirectToRoute('admin_session_show', ['id' => $sessionId]);
         }
@@ -28,7 +28,7 @@ class QuestionActivateController extends AbstractController
 
         if ($question->isPending()) {
             $question->setStatus(Question::STATUS_ACTIVE);
-            $em->flush();
+            $entityManager->flush();
             $this->addFlash('success', 'Question activée.');
         }
 

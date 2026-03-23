@@ -12,17 +12,17 @@ use Symfony\Component\Routing\Attribute\Route;
 class VotesFrameController extends AbstractController
 {
     #[Route('/admin/sessions/{sessionId}/questions/{id}/votes-frame', name: 'admin_votes_frame')]
-    public function __invoke(int $sessionId, Question $question, SessionRepository $sessionRepo, VoteRepository $voteRepo): Response
+    public function __invoke(int $sessionId, Question $question, SessionRepository $sessionRepository, VoteRepository $voteRepository): Response
     {
-        $session = $sessionRepo->find($sessionId);
+        $session = $sessionRepository->find($sessionId);
         if (!$session || $question->getSession() !== $session) {
-            return new Response('', 404);
+            return new Response('', Response::HTTP_NOT_FOUND);
         }
 
-        $rawResults = $voteRepo->getResultsForQuestion($question);
+        $rawResults = $voteRepository->getResultsForQuestion($question);
         $byChoice = [];
-        foreach ($rawResults as $row) {
-            $byChoice[(int) $row['choice_id']] = (int) $row['count'];
+        foreach ($rawResults as $rawResult) {
+            $byChoice[(int) $rawResult['choice_id']] = (int) $rawResult['count'];
         }
 
         return $this->render('admin/_votes_frame.html.twig', [

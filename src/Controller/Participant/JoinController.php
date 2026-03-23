@@ -2,6 +2,7 @@
 
 namespace App\Controller\Participant;
 
+use App\Entity\Session;
 use App\Entity\Participant;
 use App\Repository\SessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,10 +15,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class JoinController extends AbstractController
 {
     #[Route('/s/{token}', name: 'session_join')]
-    public function __invoke(string $token, Request $request, SessionRepository $sessionRepo, EntityManagerInterface $em, SessionInterface $httpSession): Response
+    public function __invoke(string $token, Request $request, SessionRepository $sessionRepository, EntityManagerInterface $entityManager, SessionInterface $httpSession): Response
     {
-        $session = $sessionRepo->findByToken($token);
-        if (!$session) {
+        $session = $sessionRepository->findByToken($token);
+        if (!$session instanceof Session) {
             throw $this->createNotFoundException('Session introuvable.');
         }
 
@@ -34,8 +35,8 @@ class JoinController extends AbstractController
                 $participant = new Participant();
                 $participant->setName($name);
                 $participant->setSession($session);
-                $em->persist($participant);
-                $em->flush();
+                $entityManager->persist($participant);
+                $entityManager->flush();
 
                 $httpSession->set('participant_token_'.$session->getToken(), $participant->getToken());
 

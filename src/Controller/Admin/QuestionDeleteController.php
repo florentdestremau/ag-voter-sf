@@ -12,12 +12,12 @@ use Symfony\Component\Routing\Attribute\Route;
 class QuestionDeleteController extends AbstractController
 {
     #[Route('/admin/sessions/{sessionId}/questions/{id}/delete', name: 'admin_question_delete', methods: ['POST'])]
-    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    public function __invoke(int $sessionId, Question $question, EntityManagerInterface $entityManager, SessionRepository $sessionRepository): Response
     {
-        $session = $sessionRepo->find($sessionId);
+        $session = $sessionRepository->find($sessionId);
         if ($session && $question->getSession() === $session && $question->isPending()) {
-            $em->remove($question);
-            $em->flush();
+            $entityManager->remove($question);
+            $entityManager->flush();
             $this->addFlash('success', 'Question supprimée.');
         }
 

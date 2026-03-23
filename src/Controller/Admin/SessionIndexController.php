@@ -10,10 +10,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class SessionIndexController extends AbstractController
 {
     #[Route('/admin', name: 'admin_index')]
-    public function __invoke(SessionRepository $repo): Response
+    public function __invoke(SessionRepository $sessionRepository): Response
     {
         return $this->render('admin/index.html.twig', [
-            'sessions' => $repo->findBy([], ['createdAt' => 'DESC']),
+            'sessions' => $sessionRepository->findBy([], ['createdAt' => 'DESC']),
         ]);
     }
 }

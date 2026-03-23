@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTimeImmutable;
 use App\Repository\ParticipantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -26,7 +27,7 @@ class Participant
     private string $token;
 
     #[ORM\Column]
-    private \DateTimeImmutable $joinedAt;
+    private DateTimeImmutable $joinedAt;
 
     /** @var Collection<int, Vote> */
     #[ORM\OneToMany(targetEntity: Vote::class, mappedBy: 'participant', cascade: ['remove'])]
@@ -34,7 +35,7 @@ class Participant
 
     public function __construct()
     {
-        $this->joinedAt = new \DateTimeImmutable();
+        $this->joinedAt = new DateTimeImmutable();
         $this->token = bin2hex(random_bytes(16));
         $this->votes = new ArrayCollection();
     }
@@ -73,7 +74,7 @@ class Participant
         return $this;
     }
 
-    public function getJoinedAt(): \DateTimeImmutable
+    public function getJoinedAt(): DateTimeImmutable
     {
         return $this->joinedAt;
     }

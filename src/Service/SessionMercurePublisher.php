@@ -13,33 +13,33 @@ class SessionMercurePublisher
 {
     public function __construct(
         private readonly HubInterface $hub,
-        private readonly Environment $twig,
-        private readonly VoteRepository $voteRepo,
+        private readonly Environment $twigEnvironment,
+        private readonly VoteRepository $voteRepository,
     ) {
     }
 
     public function publishParticipantsFrame(Session $session): void
     {
-        $html = $this->twig->render('admin/_participants_frame.html.twig', ['session' => $session]);
-        $this->publishStream("session/{$session->getId()}/participants", 'participants-frame', $html);
+        $html = $this->twigEnvironment->render('admin/_participants_frame.html.twig', ['session' => $session]);
+        $this->publishStream(sprintf('session/%s/participants', $session->getId()), 'participants-frame', $html);
     }
 
     public function publishVotesFrame(Question $question, int $totalParticipants): void
     {
-        $rawResults = $this->voteRepo->getResultsForQuestion($question);
+        $rawResults = $this->voteRepository->getResultsForQuestion($question);
         $byChoice = [];
-        foreach ($rawResults as $row) {
-            $byChoice[(int) $row['choice_id']] = (int) $row['count'];
+        foreach ($rawResults as $rawResult) {
+            $byChoice[(int) $rawResult['choice_id']] = (int) $rawResult['count'];
         }
 
-        $html = $this->twig->render('admin/_votes_frame.html.twig', [
+        $html = $this->twigEnvironment->render('admin/_votes_frame.html.twig', [
             'question' => $question,
             'totalParticipants' => $totalParticipants,
             'byChoice' => $byChoice,
         ]);
         $this->publishStream(
-            "session/{$question->getSession()->getId()}/votes",
-            "votes-frame-{$question->getId()}",
+            sprintf('session/%s/votes', $question->getSession()->getId()),
+            'votes-frame-' . $question->getId(),
             $html,
         );
     }
@@ -52,14 +52,14 @@ class SessionMercurePublisher
         }
 
         $this->hub->publish(new Update(
-            "session/{$session->getId()}/participant-events",
+            sprintf('session/%s/participant-events', $session->getId()),
             $payload,
         ));
     }
 
     private function publishStream(string $topic, string $target, string $html): void
     {
-        $stream = "<turbo-stream action=\"replace\" target=\"{$target}\"><template>{$html}</template></turbo-stream>";
+        $stream = sprintf('<turbo-stream action="replace" target="%s"><template>%s</template></turbo-stream>', $target, $html);
         $this->hub->publish(new Update($topic, $stream));
     }
 }

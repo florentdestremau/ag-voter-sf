@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Choice;
 use App\Entity\Participant;
 use App\Entity\Question;
@@ -10,26 +14,26 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
-class AdminSessionTest extends WebTestCase
+final class AdminSessionTest extends WebTestCase
 {
-    private function getAdminClient(): \Symfony\Bundle\FrameworkBundle\KernelBrowser
+    private function getAdminClient(): KernelBrowser
     {
-        $client = static::createClient();
-        $provider = static::getContainer()->get('security.user.provider.concrete.admin_provider');
-        self::assertInstanceOf(UserProviderInterface::class, $provider);
+        $kernelBrowser = self::createClient();
+        $provider = self::getContainer()->get('security.user.provider.concrete.admin_provider');
+        $this->assertInstanceOf(UserProviderInterface::class, $provider);
 
-        $client->loginUser(
+        $kernelBrowser->loginUser(
             $provider->loadUserByIdentifier('admin'),
             'admin'
         );
 
-        return $client;
+        return $kernelBrowser;
     }
 
     private function em(): EntityManagerInterface
     {
-        $em = static::getContainer()->get(EntityManagerInterface::class);
-        self::assertInstanceOf(EntityManagerInterface::class, $em);
+        $em = self::getContainer()->get(EntityManagerInterface::class);
+        $this->assertInstanceOf(EntityManagerInterface::class, $em);
 
         return $em;
     }
@@ -40,15 +44,15 @@ class AdminSessionTest extends WebTestCase
 
     public function testAdminIndexRequiresAuth(): void
     {
-        $client = static::createClient();
-        $client->request('GET', '/admin');
+        $kernelBrowser = self::createClient();
+        $kernelBrowser->request(Request::METHOD_GET, '/admin');
         $this->assertResponseRedirects('/login');
     }
 
     public function testAdminIndexWithAuth(): void
     {
-        $client = $this->getAdminClient();
-        $client->request('GET', '/admin');
+        $kernelBrowser = $this->getAdminClient();
+        $kernelBrowser->request(Request::METHOD_GET, '/admin');
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('h1', 'Sessions de vote');
     }
@@ -59,13 +63,13 @@ class AdminSessionTest extends WebTestCase
 
     public function testCreateSession(): void
     {
-        $client = $this->getAdminClient();
-        $client->request('GET', '/admin/sessions/new');
+        $kernelBrowser = $this->getAdminClient();
+        $kernelBrowser->request(Request::METHOD_GET, '/admin/sessions/new');
         $this->assertResponseIsSuccessful();
 
-        $client->submitForm('Créer', ['session[name]' => 'AG de test fonctionnel']);
+        $kernelBrowser->submitForm('Créer', ['session[name]' => 'AG de test fonctionnel']);
         $this->assertResponseRedirects();
-        $client->followRedirect();
+        $kernelBrowser->followRedirect();
 
         $this->assertSelectorTextContains('h1', 'AG de test fonctionnel');
         $this->assertSelectorTextContains('body', 'En attente');
@@ -73,74 +77,80 @@ class AdminSessionTest extends WebTestCase
 
     public function testCreateSessionWithEmptyNameShowsError(): void
     {
-        $client = $this->getAdminClient();
-        $client->request('GET', '/admin/sessions/new');
+        $kernelBrowser = $this->getAdminClient();
+        $kernelBrowser->request(Request::METHOD_GET, '/admin/sessions/new');
 
-        $client->submitForm('Créer', ['session[name]' => '']);
+        $kernelBrowser->submitForm('Créer', ['session[name]' => '']);
 
         // Reste sur le formulaire (pas de redirect) avec 422 Unprocessable Content
         $this->assertResponseStatusCodeSame(422);
-        $this->assertSame('/admin/sessions/new', $client->getRequest()->getRequestUri());
+        $this->assertSame('/admin/sessions/new', $kernelBrowser->getRequest()->getRequestUri());
     }
 
     public function testOpenSession(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session à ouvrir');
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$id}/open");
-        $this->assertResponseRedirects("/admin/sessions/{$id}");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/open', $id));
+        $this->assertResponseRedirects('/admin/sessions/' . $id);
 
         $fresh = $em->find(Session::class, $id);
-        self::assertInstanceOf(Session::class, $fresh);
+        $this->assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_ACTIVE, $fresh->getStatus());
     }
 
     public function testCloseSession(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session à fermer');
         $session->setStatus(Session::STATUS_ACTIVE);
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$id}/close");
-        $this->assertResponseRedirects("/admin/sessions/{$id}");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/close', $id));
+        $this->assertResponseRedirects('/admin/sessions/' . $id);
 
         $fresh = $em->find(Session::class, $id);
-        self::assertInstanceOf(Session::class, $fresh);
+        $this->assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_CLOSED, $fresh->getStatus());
     }
 
     public function testOpenSessionTransitionPendingToActive(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Transition');
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
 
         $this->assertSame(Session::STATUS_PENDING, $session->getStatus());
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$id}/open");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/open', $id));
         $fresh = $em->find(Session::class, $id);
-        self::assertInstanceOf(Session::class, $fresh);
+        $this->assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_ACTIVE, $fresh->getStatus());
     }
 
@@ -150,44 +160,48 @@ class AdminSessionTest extends WebTestCase
 
     public function testCreateQuestion(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session questions');
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
         $em->clear();
 
-        $client->request('GET', "/admin/sessions/{$id}/questions/new");
+        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/questions/new', $id));
         $this->assertResponseIsSuccessful();
 
-        $client->submitForm('Enregistrer', [
+        $kernelBrowser->submitForm('Enregistrer', [
             'question[text]' => 'Approuvez-vous le rapport ?',
             'question[choices][0][text]' => 'Pour',
             'question[choices][1][text]' => 'Contre',
             'question[choices][2][text]' => 'Abstention',
         ]);
 
-        $this->assertResponseRedirects("/admin/sessions/{$id}");
-        $client->followRedirect();
+        $this->assertResponseRedirects('/admin/sessions/' . $id);
+        $kernelBrowser->followRedirect();
         $this->assertSelectorTextContains('body', 'Approuvez-vous le rapport ?');
     }
 
     public function testQuestionFormPreloadsPourContreAbstention(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session preload');
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
         $em->clear();
 
-        $client->request('GET', "/admin/sessions/{$id}/questions/new");
+        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/questions/new', $id));
         $this->assertResponseIsSuccessful();
         $this->assertInputValueSame('question[choices][0][text]', 'Pour');
         $this->assertInputValueSame('question[choices][1][text]', 'Contre');
@@ -196,12 +210,13 @@ class AdminSessionTest extends WebTestCase
 
     public function testActivateQuestion(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session activation');
         $session->setStatus(Session::STATUS_ACTIVE);
+
         $em->persist($session);
 
         $question = new Question();
@@ -209,6 +224,7 @@ class AdminSessionTest extends WebTestCase
         $question->setText('Question à activer');
         $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
         $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
+
         $em->persist($question);
         $em->flush();
 
@@ -216,22 +232,23 @@ class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$sid}/questions/{$qid}/activate");
-        $this->assertResponseRedirects("/admin/sessions/{$sid}");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/' . $sid);
 
         $fresh = $em->find(Question::class, $qid);
-        self::assertInstanceOf(Question::class, $fresh);
+        $this->assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_ACTIVE, $fresh->getStatus());
     }
 
     public function testCloseQuestion(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session close question');
         $session->setStatus(Session::STATUS_ACTIVE);
+
         $em->persist($session);
 
         $question = new Question();
@@ -240,6 +257,7 @@ class AdminSessionTest extends WebTestCase
         $question->setStatus(Question::STATUS_ACTIVE);
         $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
         $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
+
         $em->persist($question);
         $em->flush();
 
@@ -247,21 +265,22 @@ class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$sid}/questions/{$qid}/close");
-        $this->assertResponseRedirects("/admin/sessions/{$sid}");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/close', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/' . $sid);
 
         $fresh = $em->find(Question::class, $qid);
-        self::assertInstanceOf(Question::class, $fresh);
+        $this->assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_CLOSED, $fresh->getStatus());
     }
 
     public function testDeletePendingQuestion(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session delete');
+
         $em->persist($session);
 
         $question = new Question();
@@ -269,6 +288,7 @@ class AdminSessionTest extends WebTestCase
         $question->setText('À supprimer');
         $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
         $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
+
         $em->persist($question);
         $em->flush();
 
@@ -276,19 +296,20 @@ class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$sid}/questions/{$qid}/delete");
-        $this->assertResponseRedirects("/admin/sessions/{$sid}");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/delete', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/' . $sid);
 
-        $this->assertNull($em->find(Question::class, $qid));
+        $this->assertNotInstanceOf(Question::class, $em->find(Question::class, $qid));
     }
 
     public function testCannotActivateQuestionOnPendingSession(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session(); // status = pending
         $session->setName('Session pending');
+
         $em->persist($session);
 
         $question = new Question();
@@ -296,6 +317,7 @@ class AdminSessionTest extends WebTestCase
         $question->setText('Question');
         $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
         $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
+
         $em->persist($question);
         $em->flush();
 
@@ -303,42 +325,46 @@ class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $client->request('POST', "/admin/sessions/{$sid}/questions/{$qid}/activate");
+        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
 
         $fresh = $em->find(Question::class, $qid);
-        self::assertInstanceOf(Question::class, $fresh);
+        $this->assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_PENDING, $fresh->getStatus());
     }
 
     public function testParticipantsFrameEndpoint(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session frame');
+
         $em->persist($session);
         $em->flush();
+
         $id = $session->getId();
         $em->clear();
 
-        $client->request('GET', "/admin/sessions/{$id}/participants-frame");
+        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/participants-frame', $id));
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Aucun participant');
     }
 
     public function testParticipantCopyLinkButtonVisibleInFrame(): void
     {
-        $client = $this->getAdminClient();
+        $kernelBrowser = $this->getAdminClient();
         $em = $this->em();
 
         $session = new Session();
         $session->setName('Session lien participant');
+
         $em->persist($session);
 
         $participant = new Participant();
         $participant->setName('Luc Renard');
         $participant->setSession($session);
+
         $em->persist($participant);
         $em->flush();
 
@@ -346,11 +372,11 @@ class AdminSessionTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $client->request('GET', "/admin/sessions/{$id}/participants-frame");
+        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/participants-frame', $id));
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Luc Renard');
 
-        $crawler = $client->getCrawler();
+        $crawler = $kernelBrowser->getCrawler();
         $input = $crawler->filter('input[value*="/p/'.$pToken.'"]');
         $this->assertCount(1, $input);
     }

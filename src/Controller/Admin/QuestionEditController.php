@@ -14,9 +14,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class QuestionEditController extends AbstractController
 {
     #[Route('/admin/sessions/{sessionId}/questions/{id}/edit', name: 'admin_question_edit', methods: ['GET', 'POST'])]
-    public function __invoke(Request $request, int $sessionId, Question $question, EntityManagerInterface $em, SessionRepository $sessionRepo): Response
+    public function __invoke(Request $request, int $sessionId, Question $question, EntityManagerInterface $entityManager, SessionRepository $sessionRepository): Response
     {
-        $session = $sessionRepo->find($sessionId);
+        $session = $sessionRepository->find($sessionId);
         if (!$session || $question->getSession() !== $session || !$question->isPending()) {
             return $this->redirectToRoute('admin_session_show', ['id' => $sessionId]);
         }
@@ -29,7 +29,8 @@ class QuestionEditController extends AbstractController
                 $choice->setQuestion($question);
                 $choice->setOrderIndex($i);
             }
-            $em->flush();
+
+            $entityManager->flush();
             $this->addFlash('success', 'Question modifiée.');
 
             return $this->redirectToRoute('admin_session_show', ['id' => $session->getId()]);
