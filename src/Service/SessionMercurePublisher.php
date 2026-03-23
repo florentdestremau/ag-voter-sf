@@ -46,9 +46,14 @@ class SessionMercurePublisher
 
     public function publishParticipantReload(Session $session): void
     {
+        $payload = json_encode(['type' => 'reload']);
+        if (false === $payload) {
+            return;
+        }
+
         $this->hub->publish(new Update(
             "session/{$session->getId()}/participant-events",
-            json_encode(['type' => 'reload']),
+            $payload,
         ));
     }
 

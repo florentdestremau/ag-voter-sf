@@ -94,19 +94,31 @@ class MercureDoctrineListener
     private function track(object $entity): void
     {
         if ($entity instanceof Participant) {
-            $this->participantsSessions[$entity->getSession()->getId()] = true;
+            $sessionId = $entity->getSession()->getId();
+            if (null !== $sessionId) {
+                $this->participantsSessions[$sessionId] = true;
+            }
         }
 
         if ($entity instanceof Vote) {
-            $this->votesSessions[$entity->getQuestion()->getSession()->getId()] = true;
+            $sessionId = $entity->getQuestion()->getSession()->getId();
+            if (null !== $sessionId) {
+                $this->votesSessions[$sessionId] = true;
+            }
         }
 
         if ($entity instanceof Question) {
-            $this->reloadSessions[$entity->getSession()->getId()] = true;
+            $sessionId = $entity->getSession()->getId();
+            if (null !== $sessionId) {
+                $this->reloadSessions[$sessionId] = true;
+            }
         }
 
         if ($entity instanceof Session) {
-            $this->reloadSessions[$entity->getId()] = true;
+            $sessionId = $entity->getId();
+            if (null !== $sessionId) {
+                $this->reloadSessions[$sessionId] = true;
+            }
         }
     }
 }

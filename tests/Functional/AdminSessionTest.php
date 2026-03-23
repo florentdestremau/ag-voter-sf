@@ -8,14 +8,18 @@ use App\Entity\Question;
 use App\Entity\Session;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 class AdminSessionTest extends WebTestCase
 {
     private function getAdminClient(): \Symfony\Bundle\FrameworkBundle\KernelBrowser
     {
         $client = static::createClient();
+        $provider = static::getContainer()->get('security.user.provider.concrete.admin_provider');
+        self::assertInstanceOf(UserProviderInterface::class, $provider);
+
         $client->loginUser(
-            static::getContainer()->get('security.user.provider.concrete.admin_provider')->loadUserByIdentifier('admin'),
+            $provider->loadUserByIdentifier('admin'),
             'admin'
         );
 
@@ -24,7 +28,10 @@ class AdminSessionTest extends WebTestCase
 
     private function em(): EntityManagerInterface
     {
-        return static::getContainer()->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        self::assertInstanceOf(EntityManagerInterface::class, $em);
+
+        return $em;
     }
 
     // -------------------------------------------------------------------------
@@ -92,6 +99,7 @@ class AdminSessionTest extends WebTestCase
         $this->assertResponseRedirects("/admin/sessions/{$id}");
 
         $fresh = $em->find(Session::class, $id);
+        self::assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_ACTIVE, $fresh->getStatus());
     }
 
@@ -112,6 +120,7 @@ class AdminSessionTest extends WebTestCase
         $this->assertResponseRedirects("/admin/sessions/{$id}");
 
         $fresh = $em->find(Session::class, $id);
+        self::assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_CLOSED, $fresh->getStatus());
     }
 
@@ -131,6 +140,7 @@ class AdminSessionTest extends WebTestCase
 
         $client->request('POST', "/admin/sessions/{$id}/open");
         $fresh = $em->find(Session::class, $id);
+        self::assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_ACTIVE, $fresh->getStatus());
     }
 
@@ -210,6 +220,7 @@ class AdminSessionTest extends WebTestCase
         $this->assertResponseRedirects("/admin/sessions/{$sid}");
 
         $fresh = $em->find(Question::class, $qid);
+        self::assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_ACTIVE, $fresh->getStatus());
     }
 
@@ -240,6 +251,7 @@ class AdminSessionTest extends WebTestCase
         $this->assertResponseRedirects("/admin/sessions/{$sid}");
 
         $fresh = $em->find(Question::class, $qid);
+        self::assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_CLOSED, $fresh->getStatus());
     }
 
@@ -294,6 +306,7 @@ class AdminSessionTest extends WebTestCase
         $client->request('POST', "/admin/sessions/{$sid}/questions/{$qid}/activate");
 
         $fresh = $em->find(Question::class, $qid);
+        self::assertInstanceOf(Question::class, $fresh);
         $this->assertSame(Question::STATUS_PENDING, $fresh->getStatus());
     }
 

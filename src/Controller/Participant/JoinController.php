@@ -28,7 +28,7 @@ class JoinController extends AbstractController
         $error = null;
         if ($request->isMethod('POST')) {
             $name = trim($request->request->getString('name'));
-            if (strlen($name) < 2 || strlen($name) > 100) {
+            if (\strlen($name) < 2 || \strlen($name) > 100) {
                 $error = 'Le nom doit contenir entre 2 et 100 caractères.';
             } else {
                 $participant = new Participant();

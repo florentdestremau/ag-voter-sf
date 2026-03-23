@@ -14,10 +14,17 @@ class ParticipantTest extends WebTestCase
 {
     private function em(): EntityManagerInterface
     {
-        return static::getContainer()->get(EntityManagerInterface::class);
+        $em = static::getContainer()->get(EntityManagerInterface::class);
+        self::assertInstanceOf(EntityManagerInterface::class, $em);
+
+        return $em;
     }
 
-    /** Crée une session active avec une question active. Retourne [sessionToken, participantToken, choicePourId, choiceContreId, questionId] */
+    /**
+     * Crée une session active avec une question active.
+     *
+     * @return array{0: string, 1: string, 2: int, 3: int, 4: int}
+     */
     private function setupActiveVotingSession(): array
     {
         $em = $this->em();
@@ -44,6 +51,9 @@ class ParticipantTest extends WebTestCase
 
         $em->flush();
         $em->clear();
+        self::assertNotNull($choicePour->getId());
+        self::assertNotNull($choiceContre->getId());
+        self::assertNotNull($question->getId());
 
         return [
             $session->getToken(),
@@ -93,8 +103,11 @@ class ParticipantTest extends WebTestCase
         $client->followRedirect();
 
         $fresh = $em->find(Session::class, $id);
+        self::assertInstanceOf(Session::class, $fresh);
         $this->assertCount(1, $fresh->getParticipants());
-        $this->assertSame('Jean Dupont', $fresh->getParticipants()->first()->getName());
+        $firstParticipant = $fresh->getParticipants()->first();
+        self::assertInstanceOf(Participant::class, $firstParticipant);
+        $this->assertSame('Jean Dupont', $firstParticipant->getName());
     }
 
     public function testJoinWithTooShortName(): void
@@ -182,12 +195,15 @@ class ParticipantTest extends WebTestCase
         $client = static::createClient();
         $em = $this->em();
 
-        [$sessionToken, $pToken, $choicePourId, , $questionId] = $this->setupActiveVotingSession();
+        [, $pToken, $choicePourId, , $questionId] = $this->setupActiveVotingSession();
 
         // Ajouter le vote directement en BDD
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
         $question = $em->find(Question::class, $questionId);
         $choice = $em->find(Choice::class, $choicePourId);
+        self::assertInstanceOf(Participant::class, $participant);
+        self::assertInstanceOf(Question::class, $question);
+        self::assertInstanceOf(Choice::class, $choice);
 
         $vote = new Vote();
         $vote->setParticipant($participant);
@@ -259,6 +275,7 @@ class ParticipantTest extends WebTestCase
         $this->assertResponseRedirects('/p/'.$pToken);
 
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
+        self::assertInstanceOf(Participant::class, $participant);
         $vote = $em->getRepository(Vote::class)->findOneBy([
             'participant' => $participant,
             'question' => $em->find(Question::class, $questionId),
@@ -277,10 +294,14 @@ class ParticipantTest extends WebTestCase
         // Premier vote (direct en BDD)
         $participant = $em->getRepository(Participant::class)->findOneBy(['token' => $pToken]);
         $question = $em->find(Question::class, $questionId);
+        self::assertInstanceOf(Participant::class, $participant);
+        self::assertInstanceOf(Question::class, $question);
         $vote = new Vote();
         $vote->setParticipant($participant);
         $vote->setQuestion($question);
-        $vote->setChoice($em->find(Choice::class, $choicePourId));
+        $choice = $em->find(Choice::class, $choicePourId);
+        self::assertInstanceOf(Choice::class, $choice);
+        $vote->setChoice($choice);
         $em->persist($vote);
         $em->flush();
         $em->clear();
