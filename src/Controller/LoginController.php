@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use LogicException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -26,6 +25,6 @@ class LoginController extends AbstractController
     #[Route('/logout', name: 'logout', methods: ['POST'])]
     public function logout(): never
     {
-        throw new LogicException('Intercepted by the firewall.');
+        throw new \LogicException('Intercepted by the firewall.');
     }
 }

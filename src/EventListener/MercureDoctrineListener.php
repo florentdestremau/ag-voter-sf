@@ -2,7 +2,6 @@
 
 namespace App\EventListener;
 
-use Throwable;
 use App\Entity\Participant;
 use App\Entity\Question;
 use App\Entity\Session;
@@ -66,14 +65,14 @@ class MercureDoctrineListener
                 }
             }
 
-            foreach ($this->votesSessions as $sessionId => $_) {
+            foreach (array_keys($this->votesSessions) as $sessionId) {
                 $session = $entityManager->find(Session::class, $sessionId);
                 if (!$session instanceof Session) {
                     continue;
                 }
 
                 $activeQuestion = $session->getActiveQuestion();
-                if ($activeQuestion) {
+                if ($activeQuestion instanceof Question) {
                     $this->sessionMercurePublisher->publishVotesFrame($activeQuestion, $session->getParticipants()->count());
                 }
             }
@@ -84,7 +83,7 @@ class MercureDoctrineListener
                     $this->sessionMercurePublisher->publishParticipantReload($session);
                 }
             }
-        } catch (Throwable $throwable) {
+        } catch (\Throwable $throwable) {
             $this->logger?->error('Failed to publish Mercure update: '.$throwable->getMessage());
         } finally {
             $this->participantsSessions = [];

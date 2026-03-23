@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use DateTimeImmutable;
 use App\Repository\VoteRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -31,11 +30,11 @@ class Vote
     private ?string $freeText = null;
 
     #[ORM\Column]
-    private DateTimeImmutable $votedAt;
+    private \DateTimeImmutable $votedAt;
 
     public function __construct()
     {
-        $this->votedAt = new DateTimeImmutable();
+        $this->votedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -91,7 +90,7 @@ class Vote
         return $this;
     }
 
-    public function getVotedAt(): DateTimeImmutable
+    public function getVotedAt(): \DateTimeImmutable
     {
         return $this->votedAt;
     }

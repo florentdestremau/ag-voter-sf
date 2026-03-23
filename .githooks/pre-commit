@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "[pre-commit] phpstan"
+vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
+
+echo "[pre-commit] rector --dry-run"
+vendor/bin/rector process --dry-run --no-progress-bar
+
+echo "[pre-commit] php-cs-fixer --dry-run"
+vendor/bin/php-cs-fixer fix --dry-run --diff

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Choice;
 use App\Entity\Participant;
 use App\Entity\Question;
@@ -12,6 +11,7 @@ use App\Entity\Session;
 use App\Entity\Vote;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Request;
 
 final class ParticipantTest extends WebTestCase
 {

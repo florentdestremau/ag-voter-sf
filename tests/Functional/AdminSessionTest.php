@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Functional;
 
-use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Choice;
 use App\Entity\Participant;
 use App\Entity\Question;
 use App\Entity\Session;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 final class AdminSessionTest extends WebTestCase
@@ -101,8 +101,8 @@ final class AdminSessionTest extends WebTestCase
         $id = $session->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/open', $id));
-        $this->assertResponseRedirects('/admin/sessions/' . $id);
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/open', $id));
+        $this->assertResponseRedirects('/admin/sessions/'.$id);
 
         $fresh = $em->find(Session::class, $id);
         $this->assertInstanceOf(Session::class, $fresh);
@@ -124,8 +124,8 @@ final class AdminSessionTest extends WebTestCase
         $id = $session->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/close', $id));
-        $this->assertResponseRedirects('/admin/sessions/' . $id);
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/close', $id));
+        $this->assertResponseRedirects('/admin/sessions/'.$id);
 
         $fresh = $em->find(Session::class, $id);
         $this->assertInstanceOf(Session::class, $fresh);
@@ -148,7 +148,7 @@ final class AdminSessionTest extends WebTestCase
         $this->assertSame(Session::STATUS_PENDING, $session->getStatus());
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/open', $id));
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/open', $id));
         $fresh = $em->find(Session::class, $id);
         $this->assertInstanceOf(Session::class, $fresh);
         $this->assertSame(Session::STATUS_ACTIVE, $fresh->getStatus());
@@ -172,7 +172,7 @@ final class AdminSessionTest extends WebTestCase
         $id = $session->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/questions/new', $id));
+        $kernelBrowser->request(Request::METHOD_GET, \sprintf('/admin/sessions/%s/questions/new', $id));
         $this->assertResponseIsSuccessful();
 
         $kernelBrowser->submitForm('Enregistrer', [
@@ -182,7 +182,7 @@ final class AdminSessionTest extends WebTestCase
             'question[choices][2][text]' => 'Abstention',
         ]);
 
-        $this->assertResponseRedirects('/admin/sessions/' . $id);
+        $this->assertResponseRedirects('/admin/sessions/'.$id);
         $kernelBrowser->followRedirect();
         $this->assertSelectorTextContains('body', 'Approuvez-vous le rapport ?');
     }
@@ -201,7 +201,7 @@ final class AdminSessionTest extends WebTestCase
         $id = $session->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/questions/new', $id));
+        $kernelBrowser->request(Request::METHOD_GET, \sprintf('/admin/sessions/%s/questions/new', $id));
         $this->assertResponseIsSuccessful();
         $this->assertInputValueSame('question[choices][0][text]', 'Pour');
         $this->assertInputValueSame('question[choices][1][text]', 'Contre');
@@ -232,8 +232,8 @@ final class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
-        $this->assertResponseRedirects('/admin/sessions/' . $sid);
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/'.$sid);
 
         $fresh = $em->find(Question::class, $qid);
         $this->assertInstanceOf(Question::class, $fresh);
@@ -265,8 +265,8 @@ final class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/close', $sid, $qid));
-        $this->assertResponseRedirects('/admin/sessions/' . $sid);
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/questions/%s/close', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/'.$sid);
 
         $fresh = $em->find(Question::class, $qid);
         $this->assertInstanceOf(Question::class, $fresh);
@@ -296,8 +296,8 @@ final class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/delete', $sid, $qid));
-        $this->assertResponseRedirects('/admin/sessions/' . $sid);
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/questions/%s/delete', $sid, $qid));
+        $this->assertResponseRedirects('/admin/sessions/'.$sid);
 
         $this->assertNotInstanceOf(Question::class, $em->find(Question::class, $qid));
     }
@@ -325,7 +325,7 @@ final class AdminSessionTest extends WebTestCase
         $qid = $question->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_POST, sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
+        $kernelBrowser->request(Request::METHOD_POST, \sprintf('/admin/sessions/%s/questions/%s/activate', $sid, $qid));
 
         $fresh = $em->find(Question::class, $qid);
         $this->assertInstanceOf(Question::class, $fresh);
@@ -346,7 +346,7 @@ final class AdminSessionTest extends WebTestCase
         $id = $session->getId();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/participants-frame', $id));
+        $kernelBrowser->request(Request::METHOD_GET, \sprintf('/admin/sessions/%s/participants-frame', $id));
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Aucun participant');
     }
@@ -372,7 +372,7 @@ final class AdminSessionTest extends WebTestCase
         $pToken = $participant->getToken();
         $em->clear();
 
-        $kernelBrowser->request(Request::METHOD_GET, sprintf('/admin/sessions/%s/participants-frame', $id));
+        $kernelBrowser->request(Request::METHOD_GET, \sprintf('/admin/sessions/%s/participants-frame', $id));
         $this->assertResponseIsSuccessful();
         $this->assertSelectorTextContains('body', 'Luc Renard');
 

@@ -2,8 +2,8 @@
 
 namespace App\Controller\Participant;
 
-use App\Entity\Session;
 use App\Entity\Participant;
+use App\Entity\Session;
 use App\Repository\SessionRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

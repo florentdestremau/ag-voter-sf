@@ -21,7 +21,7 @@ class SessionMercurePublisher
     public function publishParticipantsFrame(Session $session): void
     {
         $html = $this->twigEnvironment->render('admin/_participants_frame.html.twig', ['session' => $session]);
-        $this->publishStream(sprintf('session/%s/participants', $session->getId()), 'participants-frame', $html);
+        $this->publishStream(\sprintf('session/%s/participants', $session->getId()), 'participants-frame', $html);
     }
 
     public function publishVotesFrame(Question $question, int $totalParticipants): void
@@ -38,8 +38,8 @@ class SessionMercurePublisher
             'byChoice' => $byChoice,
         ]);
         $this->publishStream(
-            sprintf('session/%s/votes', $question->getSession()->getId()),
-            'votes-frame-' . $question->getId(),
+            \sprintf('session/%s/votes', $question->getSession()->getId()),
+            'votes-frame-'.$question->getId(),
             $html,
         );
     }
@@ -52,14 +52,14 @@ class SessionMercurePublisher
         }
 
         $this->hub->publish(new Update(
-            sprintf('session/%s/participant-events', $session->getId()),
+            \sprintf('session/%s/participant-events', $session->getId()),
             $payload,
         ));
     }
 
     private function publishStream(string $topic, string $target, string $html): void
     {
-        $stream = sprintf('<turbo-stream action="replace" target="%s"><template>%s</template></turbo-stream>', $target, $html);
+        $stream = \sprintf('<turbo-stream action="replace" target="%s"><template>%s</template></turbo-stream>', $target, $html);
         $this->hub->publish(new Update($topic, $stream));
     }
 }

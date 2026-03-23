@@ -2,8 +2,8 @@
 
 namespace App\Controller\Participant;
 
-use App\Entity\Question;
 use App\Entity\Participant;
+use App\Entity\Question;
 use App\Repository\ParticipantRepository;
 use App\Repository\VoteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;

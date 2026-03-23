@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use DateTimeImmutable;
 use App\Repository\SessionRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -33,7 +32,7 @@ class Session
     private string $status = self::STATUS_PENDING;
 
     #[ORM\Column]
-    private DateTimeImmutable $createdAt;
+    private \DateTimeImmutable $createdAt;
 
     /** @var Collection<int, Participant> */
     #[ORM\OneToMany(targetEntity: Participant::class, mappedBy: 'session', cascade: ['remove'])]
@@ -46,7 +45,7 @@ class Session
 
     public function __construct()
     {
-        $this->createdAt = new DateTimeImmutable();
+        $this->createdAt = new \DateTimeImmutable();
         $this->token = bin2hex(random_bytes(16));
         $this->participants = new ArrayCollection();
         $this->questions = new ArrayCollection();
@@ -86,7 +85,7 @@ class Session
         return $this;
     }
 
-    public function getCreatedAt(): DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }

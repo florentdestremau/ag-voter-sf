@@ -6,11 +6,11 @@ use Rector\Config\RectorConfig;
 
 return RectorConfig::configure()
     ->withPaths([
-        __DIR__ . '/assets',
-        __DIR__ . '/config',
-        __DIR__ . '/public',
-        __DIR__ . '/src',
-        __DIR__ . '/tests',
+        __DIR__.'/assets',
+        __DIR__.'/config',
+        __DIR__.'/public',
+        __DIR__.'/src',
+        __DIR__.'/tests',
     ])
     // uncomment to reach your current PHP version
     ->withPhpSets()
@@ -28,7 +28,8 @@ return RectorConfig::configure()
         doctrineCodeQuality: true,
         symfonyCodeQuality: true,
     )
-    ->withImportNames(removeUnusedImports: true)
+    ->withImportNames(importNames: false, importDocBlockNames: false, importShortClasses: false, removeUnusedImports: true)
     ->withSkip([
         Rector\Symfony\CodeQuality\Rector\Class_\ControllerMethodInjectionToConstructorRector::class,
+        Rector\CodeQuality\Rector\Foreach_\UnusedForeachValueToArrayKeysRector::class,
     ]);
