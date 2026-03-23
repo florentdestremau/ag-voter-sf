@@ -12,9 +12,9 @@ use Twig\Environment;
 class SessionMercurePublisher
 {
     public function __construct(
-        private HubInterface $hub,
-        private Environment $twig,
-        private VoteRepository $voteRepo,
+        private readonly HubInterface $hub,
+        private readonly Environment $twig,
+        private readonly VoteRepository $voteRepo,
     ) {
     }
 

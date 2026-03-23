@@ -29,7 +29,7 @@ class QuestionNewController extends AbstractController
 
         // Pré-remplir avec Pour/Contre/Abstention
         foreach (['Pour', 'Contre', 'Abstention'] as $i => $label) {
-            $question->addChoice((new Choice())->setText($label)->setOrderIndex($i));
+            $question->addChoice(new Choice()->setText($label)->setOrderIndex($i));
         }
 
         $form = $this->createForm(QuestionType::class, $question);

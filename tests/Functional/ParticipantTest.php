@@ -38,8 +38,8 @@ class ParticipantTest extends WebTestCase
         $question->setSession($session);
         $question->setText('Approuvez-vous ?');
         $question->setStatus(Question::STATUS_ACTIVE);
-        $choicePour = (new Choice())->setText('Pour')->setOrderIndex(0);
-        $choiceContre = (new Choice())->setText('Contre')->setOrderIndex(1);
+        $choicePour = new Choice()->setText('Pour')->setOrderIndex(0);
+        $choiceContre = new Choice()->setText('Contre')->setOrderIndex(1);
         $question->addChoice($choicePour);
         $question->addChoice($choiceContre);
         $em->persist($question);
@@ -232,9 +232,9 @@ class ParticipantTest extends WebTestCase
         $question->setSession($session);
         $question->setText('Question avec résultats');
         $question->setStatus(Question::STATUS_CLOSED);
-        $choicePour = (new Choice())->setText('Pour')->setOrderIndex(0);
+        $choicePour = new Choice()->setText('Pour')->setOrderIndex(0);
         $question->addChoice($choicePour);
-        $question->addChoice((new Choice())->setText('Contre')->setOrderIndex(1));
+        $question->addChoice(new Choice()->setText('Contre')->setOrderIndex(1));
         $em->persist($question);
 
         $participant = new Participant();

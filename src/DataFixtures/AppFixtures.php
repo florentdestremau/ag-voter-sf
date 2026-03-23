@@ -24,7 +24,7 @@ class AppFixtures extends Fixture
         $q1->setSession($sessionPending);
         $q1->setOrderIndex(0);
         foreach (['Pour', 'Contre', 'Abstention'] as $i => $label) {
-            $q1->addChoice((new Choice())->setText($label)->setOrderIndex($i));
+            $q1->addChoice(new Choice()->setText($label)->setOrderIndex($i));
         }
         $manager->persist($q1);
 
@@ -39,9 +39,9 @@ class AppFixtures extends Fixture
         $q2->setSession($sessionActive);
         $q2->setStatus(Question::STATUS_ACTIVE);
         $q2->setOrderIndex(0);
-        $choicePour = (new Choice())->setText('Pour')->setOrderIndex(0);
-        $choiceContre = (new Choice())->setText('Contre')->setOrderIndex(1);
-        $choiceAbs = (new Choice())->setText('Abstention')->setOrderIndex(2);
+        $choicePour = new Choice()->setText('Pour')->setOrderIndex(0);
+        $choiceContre = new Choice()->setText('Contre')->setOrderIndex(1);
+        $choiceAbs = new Choice()->setText('Abstention')->setOrderIndex(2);
         $q2->addChoice($choicePour);
         $q2->addChoice($choiceContre);
         $q2->addChoice($choiceAbs);
@@ -52,9 +52,9 @@ class AppFixtures extends Fixture
         $q3->setSession($sessionActive);
         $q3->setStatus(Question::STATUS_PENDING);
         $q3->setOrderIndex(1);
-        $q3->addChoice((new Choice())->setText('Pour')->setOrderIndex(0));
-        $q3->addChoice((new Choice())->setText('Contre')->setOrderIndex(1));
-        $q3->addChoice((new Choice())->setText('Abstention')->setOrderIndex(2));
+        $q3->addChoice(new Choice()->setText('Pour')->setOrderIndex(0));
+        $q3->addChoice(new Choice()->setText('Contre')->setOrderIndex(1));
+        $q3->addChoice(new Choice()->setText('Abstention')->setOrderIndex(2));
         $manager->persist($q3);
 
         $p1 = new Participant();
@@ -85,8 +85,8 @@ class AppFixtures extends Fixture
         $q4->setSession($sessionClosed);
         $q4->setStatus(Question::STATUS_CLOSED);
         $q4->setOrderIndex(0);
-        $choicePour4 = (new Choice())->setText('Pour')->setOrderIndex(0);
-        $choiceContre4 = (new Choice())->setText('Contre')->setOrderIndex(1);
+        $choicePour4 = new Choice()->setText('Pour')->setOrderIndex(0);
+        $choiceContre4 = new Choice()->setText('Contre')->setOrderIndex(1);
         $q4->addChoice($choicePour4);
         $q4->addChoice($choiceContre4);
         $manager->persist($q4);

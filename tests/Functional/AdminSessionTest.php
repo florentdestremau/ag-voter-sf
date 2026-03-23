@@ -207,8 +207,8 @@ class AdminSessionTest extends WebTestCase
         $question = new Question();
         $question->setSession($session);
         $question->setText('Question à activer');
-        $question->addChoice((new Choice())->setText('Oui')->setOrderIndex(0));
-        $question->addChoice((new Choice())->setText('Non')->setOrderIndex(1));
+        $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
+        $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
         $em->persist($question);
         $em->flush();
 
@@ -238,8 +238,8 @@ class AdminSessionTest extends WebTestCase
         $question->setSession($session);
         $question->setText('Question active');
         $question->setStatus(Question::STATUS_ACTIVE);
-        $question->addChoice((new Choice())->setText('Oui')->setOrderIndex(0));
-        $question->addChoice((new Choice())->setText('Non')->setOrderIndex(1));
+        $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
+        $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
         $em->persist($question);
         $em->flush();
 
@@ -267,8 +267,8 @@ class AdminSessionTest extends WebTestCase
         $question = new Question();
         $question->setSession($session);
         $question->setText('À supprimer');
-        $question->addChoice((new Choice())->setText('Oui')->setOrderIndex(0));
-        $question->addChoice((new Choice())->setText('Non')->setOrderIndex(1));
+        $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
+        $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
         $em->persist($question);
         $em->flush();
 
@@ -294,8 +294,8 @@ class AdminSessionTest extends WebTestCase
         $question = new Question();
         $question->setSession($session);
         $question->setText('Question');
-        $question->addChoice((new Choice())->setText('Oui')->setOrderIndex(0));
-        $question->addChoice((new Choice())->setText('Non')->setOrderIndex(1));
+        $question->addChoice(new Choice()->setText('Oui')->setOrderIndex(0));
+        $question->addChoice(new Choice()->setText('Non')->setOrderIndex(1));
         $em->persist($question);
         $em->flush();
 

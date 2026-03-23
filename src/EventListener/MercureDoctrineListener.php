@@ -27,8 +27,8 @@ class MercureDoctrineListener
     private array $reloadSessions = [];
 
     public function __construct(
-        private SessionMercurePublisher $publisher,
-        private ?LoggerInterface $logger = null,
+        private readonly SessionMercurePublisher $publisher,
+        private readonly ?LoggerInterface $logger = null,
     ) {
     }
 
