@@ -11,5 +11,8 @@ vendor/bin/rector process --no-progress-bar
 echo "[lint] php-cs-fixer (fix)"
 vendor/bin/php-cs-fixer fix
 
+echo "[lint] twig-cs-fixer (lint)"
+vendor/bin/twig-cs-fixer lint --fix templates/
+
 echo "[lint] phpstan (check)"
 vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
