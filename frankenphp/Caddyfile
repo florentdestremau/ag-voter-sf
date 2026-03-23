@@ -6,7 +6,34 @@
 }
 
 :80 {
-	root * /app/public
+	log {
+		format filter {
+			request>uri query {
+				replace authorization REDACTED
+			}
+		}
+	}
+
+	root /app/public
 	encode zstd br gzip
-	php_server
+
+	mercure {
+		publisher_jwt {env.MERCURE_JWT_SECRET} HS256
+		subscriber_jwt {env.MERCURE_JWT_SECRET} HS256
+		anonymous
+		subscriptions
+	}
+
+	@phpRoute {
+		not path /.well-known/mercure*
+		not file {path}
+	}
+	rewrite @phpRoute index.php
+
+	@frontController path index.php
+	php @frontController
+
+	file_server {
+		hide *.php
+	}
 }

@@ -15,7 +15,8 @@ class SessionMercurePublisher
         private HubInterface $hub,
         private Environment $twig,
         private VoteRepository $voteRepo,
-    ) {}
+    ) {
+    }
 
     public function publishParticipantsFrame(Session $session): void
     {
