@@ -6,8 +6,20 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: Lint (${{ matrix.linter.name }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        linter:
+          - name: PHPStan
+            command: vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
+          - name: Rector
+            command: vendor/bin/rector process --dry-run --no-progress-bar
+          - name: PHP CS Fixer
+            command: vendor/bin/php-cs-fixer fix --dry-run --diff
+          - name: Twig CS Fixer
+            command: vendor/bin/twig-cs-fixer lint templates/
     steps:
       - uses: actions/checkout@v4
 
@@ -21,17 +33,8 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-      - name: PHPStan
-        run: vendor/bin/phpstan analyse -c phpstan.neon.dist --no-progress
-
-      - name: Rector (dry-run)
-        run: vendor/bin/rector process --dry-run --no-progress-bar
-
-      - name: PHP CS Fixer
-        run: vendor/bin/php-cs-fixer fix --dry-run --diff
-
-      - name: Twig CS Fixer
-        run: vendor/bin/twig-cs-fixer lint templates/
+      - name: Run ${{ matrix.linter.name }}
+        run: ${{ matrix.linter.command }}
 
   test:
     name: Tests
