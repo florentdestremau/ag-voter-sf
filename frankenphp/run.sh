@@ -23,6 +23,10 @@ export APP_CACHE_DIR="${APP_CACHE_DIR:-${SCRIPT_DIR}/var/cache}"
 export APP_LOG_DIR="${APP_LOG_DIR:-${SCRIPT_DIR}/var/log}"
 export SERVER_NAME="${SERVER_NAME:-:8080}"
 export MERCURE_JWT_SECRET="${MERCURE_JWT_SECRET:-!ChangeThisMercureHubJWTSecretKey!}"
+# The Symfony publisher posts updates back to the local hub; align with our port.
+_PORT="${SERVER_NAME##*:}"
+export MERCURE_URL="${MERCURE_URL:-http://127.0.0.1:${_PORT}/.well-known/mercure}"
+export MERCURE_PUBLIC_URL="${MERCURE_PUBLIC_URL:-/.well-known/mercure}"
 
 mkdir -p "${APP_CACHE_DIR}" "${APP_LOG_DIR}" "${SCRIPT_DIR}/data"
 
