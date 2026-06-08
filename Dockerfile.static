@@ -1,0 +1,64 @@
+# syntax=docker/dockerfile:1.7
+# check=error=true
+#
+# Build a self-contained Linux x86_64 binary that bundles PHP + Caddy + Symfony app.
+# See https://frankenphp.dev/fr/docs/embed/
+
+ARG APP_VERSION=unknown
+
+FROM composer:2 AS composer
+
+# ─── App build (prod-ready Symfony tree) ───────────────────────────────────────
+FROM dunglas/frankenphp:1-php8.4-alpine AS app-builder
+
+WORKDIR /app
+
+RUN apk add --no-cache acl git && \
+    install-php-extensions intl opcache pdo_sqlite zip
+
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+
+ENV APP_ENV=prod \
+    APP_DEBUG=0 \
+    APP_SECRET=changeme-rebuilt-at-runtime \
+    DATABASE_URL="sqlite:///./data/app.db"
+
+COPY --link composer.json composer.lock symfony.lock ./
+RUN composer install --no-dev --no-scripts --prefer-dist --no-progress && \
+    rm -rf ~/.composer/cache
+
+COPY --link . .
+
+RUN composer dump-autoload --optimize --no-dev && \
+    composer dump-env prod && \
+    php bin/console importmap:install && \
+    php bin/console asset-map:compile
+
+# Drop everything the runtime doesn't need; the static binary will embed what's left.
+RUN rm -rf tests/ .git/ .github/ .claude/ var/cache/* var/log/* node_modules/ \
+           Dockerfile Dockerfile.static compose.yaml compose.override.yaml
+
+# Use the embed-tuned Caddyfile as the bundled config (FrankenPHP picks up
+# a Caddyfile at the embed root automatically).
+RUN cp frankenphp/Caddyfile.embed Caddyfile
+
+# ─── Static binary build ───────────────────────────────────────────────────────
+FROM --platform=linux/amd64 dunglas/frankenphp:static-builder-musl AS binary-builder
+
+WORKDIR /go/src/app
+
+COPY --from=app-builder /app ./dist/app
+
+ENV PHP_EXTENSIONS="ctype,iconv,intl,opcache,pdo,pdo_sqlite,session,tokenizer,filter,mbstring,dom,xml,simplexml,fileinfo,sodium"
+ENV EMBED=dist/app
+
+RUN ./build-static.sh
+
+# ─── Export stage (scratch image carrying the binary + Caddyfile) ─────────────
+# FrankenPHP extracts the embed *after* Caddy starts, so the Caddyfile must
+# sit next to the binary at runtime (auto-discovery from the embedded FS is
+# not possible).
+FROM scratch AS export
+COPY --from=binary-builder /go/src/app/dist/frankenphp-linux-x86_64 /ag-voter
+COPY --from=app-builder /app/Caddyfile /Caddyfile
+COPY --from=app-builder /app/frankenphp/run.sh /run.sh

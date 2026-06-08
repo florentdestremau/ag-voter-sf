@@ -1,0 +1,32 @@
+{
+	frankenphp
+	auto_https off
+	admin off
+	persist_config off
+	{$CADDY_GLOBAL_OPTIONS}
+}
+
+{$SERVER_NAME::8080} {
+	log {
+		format filter {
+			request>uri query {
+				replace authorization REDACTED
+			}
+		}
+	}
+
+	root {$AG_VOTER_EMBED_DIR}/public
+	encode zstd br gzip
+
+	mercure {
+		transport bolt {
+			path mercure.db
+		}
+		publisher_jwt {env.MERCURE_JWT_SECRET} HS256
+		subscriber_jwt {env.MERCURE_JWT_SECRET} HS256
+		anonymous
+		subscriptions
+	}
+
+	php_server
+}

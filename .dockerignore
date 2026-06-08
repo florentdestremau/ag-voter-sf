@@ -10,3 +10,5 @@ phpunit.dist.xml
 docker-compose*.yml
 compose*.yaml
 node_modules/
+dist/
+test-run/

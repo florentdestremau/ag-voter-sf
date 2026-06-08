@@ -26,3 +26,5 @@
 ###< friendsofphp/php-cs-fixer ###
 .twig-cs-fixer.cache
 .php-cs-fixer.cache
+
+/dist/

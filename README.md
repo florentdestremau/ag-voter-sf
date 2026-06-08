@@ -50,3 +50,20 @@ vendor/bin/twig-cs-fixer lint templates/  # vérifie les templates Twig
 ## CI
 
 GitHub Actions lance automatiquement les linters et les tests sur chaque push.
+
+## Binaire autonome (FrankenPHP embed)
+
+Build d'un binaire Linux x86_64 unique qui embarque PHP, Caddy et toute l'app :
+
+```bash
+bin/build-static.sh
+```
+
+Produit `dist/ag-voter` (~230 Mo, binaire statique) accompagné de `Caddyfile` et `run.sh`. Le wrapper est nécessaire parce que FrankenPHP extrait l'embed dans `/tmp/frankenphp_<hash>/` et Caddy a besoin de connaître ce chemin pour servir les assets ; `run.sh` le découvre et l'expose via `$AG_VOTER_EMBED_DIR`.
+
+```bash
+dist/ag-voter php-cli bin/console doctrine:migrations:migrate --no-interaction
+SERVER_NAME=':8080' dist/run.sh
+```
+
+La base SQLite est créée dans `dist/data/app.db`. Variables d'env utiles : `SERVER_NAME`, `MERCURE_JWT_SECRET`, `ADMIN_PASSWORD_HASH`, `APP_SECRET`, `APP_CACHE_DIR`, `APP_LOG_DIR`.
